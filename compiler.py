@@ -29,7 +29,7 @@ class Scanner():
     def __init__(self) -> None:
         self.line_number = 0
         self.current_line = ""
-        return
+        self.symbol_table = {k + 1: v for k, v in enumerate(self.TOKEN_TYPES[TokenType.KEYWORD])}
 
     def get_input_file(self, input: str):
         self.pointer_start = 0
@@ -60,6 +60,8 @@ class Scanner():
             if token in self.TOKEN_TYPES[TokenType.KEYWORD]:
                 return (TokenType.KEYWORD, token)
             else:
+                if not token in self.symbol_table.values():
+                    self.symbol_table[len(self.symbol_table) + 1] = token
                 return (TokenType.ID, token)
 
         elif self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.SYMBOL]:
@@ -125,12 +127,6 @@ class Scanner():
 
 
 # Example
-code = """
-int main() {
-    int x = 5;
-    return x;
-}
-"""
 scanner = Scanner()
 scanner.get_input_file("./input.txt")
 while True:
@@ -138,16 +134,4 @@ while True:
     if token == None:
         break
     print(scanner.line_number, token)
-# print(scanner.get_next_token())
-# print(scanner.pointer_start)
-
-# print(scanner.get_next_token())
-# print(scanner.pointer_start)
-# print(scanner.get_next_token())
-# print(scanner.pointer_start)
-# print(scanner.get_next_token())
-# print(scanner.pointer_start)
-# print(scanner.get_next_token())
-# print(scanner.pointer_start)
-# t = 'jao'
-# print(t[0:0])
+print(scanner.symbol_table)
