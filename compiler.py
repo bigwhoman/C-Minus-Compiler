@@ -47,9 +47,17 @@ class Scanner():
             token = self.ID_DFA(self.text)
             return ('Identifier', token)
 
-        elif self.pointer_start in self.TOKEN_TYPES['SYMBOL']:
-            pass
-
+        elif self.text[self.pointer_start] in self.TOKEN_TYPES['SYMBOL']:
+            if self.text[self.pointer_start] == "=" :
+                if self.text[self.pointer_start + 1] == "=" : 
+                    self.pointer_end += 2
+                    return ('Symbol', "==")
+                else :
+                    self.pointer_end += 1
+                    return ('Symbol', "=")
+            else :
+                self.pointer_end += 1
+                return ('Symbol', self.text[self.pointer_start])
         elif self.text[self.pointer_start] in self.TOKEN_TYPES['WHITESPACE']:
             token = self.text[self.pointer_end]
             self.pointer_end += 1 
