@@ -27,97 +27,100 @@ class Scanner():
     }
 
     def __init__(self) -> None:
-        self.text = None
+        self.line_number = 0
+        self.current_line = ""
         return
 
     def get_input_file(self, input: str):
         self.pointer_start = 0
         self.pointer_end = 0
-        file = open(input)
-        self.text = file.read()
+        self.file = open(input)
 
     def get_next_token(self):
-        if self.text == None:
-            print("No given input")
-            return
-
-        if self.pointer_end >= len(self.text):
-            print("Reached end of input")
-            return
+        # Check end of line
+        if self.pointer_end >= len(self.current_line):
+            # Read next line
+            self.current_line = self.file.readline()
+            if self.current_line == "": # end of file
+                return None
+            self.pointer_start = 0
+            self.pointer_end = 0
+            self.line_number += 1
+            return self.get_next_token()
 
         self.pointer_start = self.pointer_end
-        if self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.NUM]:
+        if self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.NUM]:
             self.pointer_end += 1
-            token = self.NUM_DFA(self.text)
+            token = self.NUM_DFA()
             return (TokenType.NUM, token)
 
-        elif self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.LETTER]:
+        elif self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.LETTER]:
             self.pointer_end += 1
-            token = self.ID_DFA(self.text)
+            token = self.ID_DFA()
             if token in self.TOKEN_TYPES[TokenType.KEYWORD]:
                 return (TokenType.KEYWORD, token)
             else:
                 return (TokenType.ID, token)
 
-        elif self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.SYMBOL]:
-            if self.text[self.pointer_start] == "=" :
-                if self.text[self.pointer_start + 1] == "=" : 
+        elif self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.SYMBOL]:
+            if self.current_line[self.pointer_start] == "=" :
+                if self.current_line[self.pointer_start + 1] == "=" : 
                     self.pointer_end += 2
                     return (TokenType.SYMBOL, "==")
-                else :
+                else:
                     self.pointer_end += 1
                     return (TokenType.SYMBOL, "=")
-            else :
+            else:
                 self.pointer_end += 1
-                return (TokenType.SYMBOL, self.text[self.pointer_start])
-        elif self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.WHITESPACE]:
-            token = self.text[self.pointer_end]
+                return (TokenType.SYMBOL, self.current_line[self.pointer_start])
+        elif self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.WHITESPACE]:
+            token = self.current_line[self.pointer_end]
             self.pointer_end += 1 
             return (TokenType.WHITESPACE, token)
 
-        elif self.text[self.pointer_start] == '/' and \
-                self.text[self.pointer_start + 1] == '*':
+        elif self.current_line[self.pointer_start] == '/' and \
+                self.current_line[self.pointer_start + 1] == '*':
             self.pointer_end += 2
-            token = self.COMMENT_DFA(self.text)
+            token = self.COMMENT_DFA()
             return (TokenType.COMMENT, token)
         else:
             SyntaxError("Unrecognized Character")
 
-    def ID_DFA(self, text: str) -> str:
-        while self.pointer_end < len(text):
-            if text[self.pointer_end] in self.TOKEN_TYPES[TokenType.LETTER] or \
-                    text[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
+    def ID_DFA(self) -> str:
+        while self.pointer_end < len(self.current_line):
+            if self.current_line[self.pointer_end] in self.TOKEN_TYPES[TokenType.LETTER] or \
+                    self.current_line[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
                 self.pointer_end += 1
             else:
                 break
 
-        return text[self.pointer_start:
+        return self.current_line[self.pointer_start:
                     self.pointer_end]
 
-    def NUM_DFA(self, text: str) -> str:
-        while self.pointer_end < len(text):
-            if text[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
+    def NUM_DFA(self) -> str:
+        while self.pointer_end < len(self.current_line):
+            if self.current_line[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
                 self.pointer_end += 1
             else:
                 break
 
-        return text[self.pointer_start:
+        return self.current_line[self.pointer_start:
                     self.pointer_end]
 
-    def WHITESPACE_DFA(self) -> list:
+    def WHITESPACE_DFA(self):
         pass
 
-    def SYMBOL_DFA(self) -> list:
+    def SYMBOL_DFA(self):
         pass
 
-    def COMMENT_DFA(self, text) -> list:
-        while self.pointer_end < len(text):
+    def COMMENT_DFA(self) -> str:
+        while self.pointer_end < len(self.current_line):
             self.pointer_end += 1
-            if text[self.pointer_end] == '*' and \
-                    text[self.pointer_end+1] == '/':
+            if self.current_line[self.pointer_end] == '*' and \
+                    self.current_line[self.pointer_end+1] == '/':
                 self.pointer_end += 2
                 break
-        return text[self.pointer_start:
+        return self.current_line[self.pointer_start:
                     self.pointer_end]
 
 
@@ -130,8 +133,11 @@ int main() {
 """
 scanner = Scanner()
 scanner.get_input_file("./input.txt")
-while scanner.pointer_end < len(scanner.text):
-    print(scanner.get_next_token())
+while True:
+    token = scanner.get_next_token()
+    if token == None:
+        break
+    print(scanner.line_number, token)
 # print(scanner.get_next_token())
 # print(scanner.pointer_start)
 
