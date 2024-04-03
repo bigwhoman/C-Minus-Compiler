@@ -65,16 +65,7 @@ class Scanner():
                 return (TokenType.ID, token)
 
         elif self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.SYMBOL]:
-            if self.current_line[self.pointer_start] == "=" :
-                if self.current_line[self.pointer_start + 1] == "=" : 
-                    self.pointer_end += 2
-                    return (TokenType.SYMBOL, "==")
-                else:
-                    self.pointer_end += 1
-                    return (TokenType.SYMBOL, "=")
-            else:
-                self.pointer_end += 1
-                return (TokenType.SYMBOL, self.current_line[self.pointer_start])
+            return (TokenType.SYMBOL, self.SYMBOL_DFA())
         elif self.current_line[self.pointer_start] in self.TOKEN_TYPES[TokenType.WHITESPACE]:
             token = self.current_line[self.pointer_end]
             self.pointer_end += 1 
@@ -86,34 +77,57 @@ class Scanner():
             token = self.COMMENT_DFA()
             return (TokenType.COMMENT, token)
         else:
-            SyntaxError("Unrecognized Character")
+            self.pointer_end += 1
+            raise SyntaxError((self.current_line[self.pointer_start:
+                                                     self.pointer_end], "Invalid input"))
 
     def ID_DFA(self) -> str:
+        others = self.TOKEN_TYPES[TokenType.SYMBOL] + self.TOKEN_TYPES[TokenType.WHITESPACE]
         while self.pointer_end < len(self.current_line):
             if self.current_line[self.pointer_end] in self.TOKEN_TYPES[TokenType.LETTER] or \
                     self.current_line[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
                 self.pointer_end += 1
-            else:
+            elif self.current_line[self.pointer_end] in others:
                 break
+            else:
+                self.pointer_end += 1
+                raise SyntaxError((self.current_line[self.pointer_start], "Invalid input"))
 
         return self.current_line[self.pointer_start:
-                    self.pointer_end]
+                                 self.pointer_end]
 
     def NUM_DFA(self) -> str:
+        others = self.TOKEN_TYPES[TokenType.SYMBOL] + self.TOKEN_TYPES[TokenType.WHITESPACE]
         while self.pointer_end < len(self.current_line):
             if self.current_line[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
                 self.pointer_end += 1
-            else:
+            elif self.current_line[self.pointer_end] in others:
                 break
-
+            else:
+                self.pointer_end += 1
+                raise SyntaxError((self.current_line[self.pointer_start:
+                                                     self.pointer_end], "Invalid number"))
+                
         return self.current_line[self.pointer_start:
                     self.pointer_end]
 
     def WHITESPACE_DFA(self):
         pass
 
-    def SYMBOL_DFA(self):
-        pass
+    def SYMBOL_DFA(self) -> str:
+        if self.current_line[self.pointer_start] == "=" :
+            if len(self.current_line) != self.pointer_start + 1 and self.current_line[self.pointer_start + 1] == "=" : 
+                self.pointer_end += 2
+                return "=="
+            else:
+                self.pointer_end += 1
+                return "="
+        elif len(self.current_line) != self.pointer_start + 1 and self.current_line[self.pointer_start:self.pointer_start + 1] == "*/":
+            self.pointer_end += 2
+            raise SyntaxError(("*/", "Invalid number"))
+        else:
+            self.pointer_end += 1
+            return self.current_line[self.pointer_start]
 
     def COMMENT_DFA(self) -> str:
         while self.pointer_end < len(self.current_line):
