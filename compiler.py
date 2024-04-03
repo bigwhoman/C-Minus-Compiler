@@ -3,31 +3,40 @@
 
 # Define Tokens
 import string
+from enum import Enum
 
+class TokenType(Enum):
+    NUM = 1
+    ID = 2
+    KEYWORD = 3
+    SYMBOL = 4
+    COMMENT = 5
+    WHITESPACE = 6
+    LETTER = -1
 
 class Scanner():
 
     TOKEN_TYPES = {
-        'NUM': list(string.digits),
-        'KEYWORD': ["if", "else", "void", "int", "for",
+        TokenType.NUM: list(string.digits),
+        TokenType.KEYWORD: ["if", "else", "void", "int", "for",
                     "break", "return", "endif"],
-        'SYMBOL': [';', ':', '[', ']', '(', ')', '{', '}', '+',
+        TokenType.SYMBOL: [';', ':', '[', ']', '(', ')', '{', '}', '+',
                    '-', '*', '=', '<'],
-        'WHITESPACE': ['\n', '\r', '\t', '\v', '\f', ' '],
-        'LETTER': list(string.ascii_letters)
+        TokenType.WHITESPACE: ['\n', '\r', '\t', '\v', '\f', ' '],
+        TokenType.LETTER: list(string.ascii_letters)
     }
 
     def __init__(self) -> None:
         self.text = None
         return
 
-    def get_input_file(self, input):
+    def get_input_file(self, input: str):
         self.pointer_start = 0
         self.pointer_end = 0
         file = open(input)
         self.text = file.read()
 
-    def get_next_token(self) -> list:
+    def get_next_token(self):
         if self.text == None:
             print("No given input")
             return
@@ -37,44 +46,47 @@ class Scanner():
             return
 
         self.pointer_start = self.pointer_end
-        if self.text[self.pointer_start] in self.TOKEN_TYPES['NUM']:
+        if self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.NUM]:
             self.pointer_end += 1
             token = self.NUM_DFA(self.text)
-            return ('Number', token)
+            return (TokenType.NUM, token)
 
-        elif self.text[self.pointer_start] in self.TOKEN_TYPES['LETTER']:
+        elif self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.LETTER]:
             self.pointer_end += 1
             token = self.ID_DFA(self.text)
-            return ('Identifier', token)
+            if token in self.TOKEN_TYPES[TokenType.KEYWORD]:
+                return (TokenType.KEYWORD, token)
+            else:
+                return (TokenType.ID, token)
 
-        elif self.text[self.pointer_start] in self.TOKEN_TYPES['SYMBOL']:
+        elif self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.SYMBOL]:
             if self.text[self.pointer_start] == "=" :
                 if self.text[self.pointer_start + 1] == "=" : 
                     self.pointer_end += 2
-                    return ('Symbol', "==")
+                    return (TokenType.SYMBOL, "==")
                 else :
                     self.pointer_end += 1
-                    return ('Symbol', "=")
+                    return (TokenType.SYMBOL, "=")
             else :
                 self.pointer_end += 1
-                return ('Symbol', self.text[self.pointer_start])
-        elif self.text[self.pointer_start] in self.TOKEN_TYPES['WHITESPACE']:
+                return (TokenType.SYMBOL, self.text[self.pointer_start])
+        elif self.text[self.pointer_start] in self.TOKEN_TYPES[TokenType.WHITESPACE]:
             token = self.text[self.pointer_end]
             self.pointer_end += 1 
-            return ('Whitespace', token)
+            return (TokenType.WHITESPACE, token)
 
         elif self.text[self.pointer_start] == '/' and \
                 self.text[self.pointer_start + 1] == '*':
             self.pointer_end += 2
             token = self.COMMENT_DFA(self.text)
-            return ('Comment', token)
+            return (TokenType.COMMENT, token)
         else:
-            SyntaxError("Unrecgonized Character")
+            SyntaxError("Unrecognized Character")
 
     def ID_DFA(self, text: str) -> str:
         while self.pointer_end < len(text):
-            if text[self.pointer_end] in self.TOKEN_TYPES['LETTER'] or \
-                    text[self.pointer_end] in self.TOKEN_TYPES['NUM']:
+            if text[self.pointer_end] in self.TOKEN_TYPES[TokenType.LETTER] or \
+                    text[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
                 self.pointer_end += 1
             else:
                 break
@@ -84,7 +96,7 @@ class Scanner():
 
     def NUM_DFA(self, text: str) -> str:
         while self.pointer_end < len(text):
-            if text[self.pointer_end] in self.TOKEN_TYPES['NUM']:
+            if text[self.pointer_end] in self.TOKEN_TYPES[TokenType.NUM]:
                 self.pointer_end += 1
             else:
                 break
