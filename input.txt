@@ -1,3 +1,7 @@
 int a == 53;
 int a = 1;
+/* multi line
+comment *
+!! */
 bb * 2 = dffkdjd
+/* big fuckup

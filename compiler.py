@@ -73,7 +73,7 @@ class Scanner():
 
         elif self.current_line[self.pointer_start] == '/' and \
                 self.current_line[self.pointer_start + 1] == '*':
-            self.pointer_end += 2
+            self.pointer_end += 1
             token = self.COMMENT_DFA()
             return (TokenType.COMMENT, token)
         else:
@@ -124,20 +124,34 @@ class Scanner():
                 return "="
         elif len(self.current_line) != self.pointer_start + 1 and self.current_line[self.pointer_start:self.pointer_start + 1] == "*/":
             self.pointer_end += 2
-            raise SyntaxError(("*/", "Invalid number"))
+            raise SyntaxError(("*/", "Unmatched comment"))
         else:
             self.pointer_end += 1
             return self.current_line[self.pointer_start]
 
     def COMMENT_DFA(self) -> str:
-        while self.pointer_end < len(self.current_line):
+        comment = "/*"
+        while True:
             self.pointer_end += 1
-            if self.current_line[self.pointer_end] == '*' and \
+            # Read next line if needed
+            if self.pointer_end >= len(self.current_line):
+                self.current_line = self.file.readline()
+                if self.current_line == "": # end of file
+                    trimmed_comment = comment
+                    if len(trimmed_comment) > 7:
+                        trimmed_comment = comment[:7] + "..."
+                    raise SyntaxError((trimmed_comment, "Unclosed comment"))
+                self.pointer_start = 0
+                self.pointer_end = -1
+                self.line_number += 1
+                continue
+            comment += self.current_line[self.pointer_end]
+            if len(self.current_line) != self.pointer_start + 1 and self.current_line[self.pointer_end] == '*' and \
                     self.current_line[self.pointer_end+1] == '/':
                 self.pointer_end += 2
+                comment += "/"
                 break
-        return self.current_line[self.pointer_start:
-                    self.pointer_end]
+        return comment
 
 
 # Example
