@@ -130,6 +130,7 @@ class Scanner():
             return self.current_line[self.pointer_start]
 
     def COMMENT_DFA(self) -> str:
+        initial_line_number = self.line_number
         comment = "/*"
         while True:
             self.pointer_end += 1
@@ -140,6 +141,7 @@ class Scanner():
                     trimmed_comment = comment
                     if len(trimmed_comment) > 7:
                         trimmed_comment = comment[:7] + "..."
+                    self.line_number = initial_line_number
                     raise SyntaxError((trimmed_comment, "Unclosed comment"))
                 self.pointer_start = 0
                 self.pointer_end = -1
@@ -153,13 +155,46 @@ class Scanner():
                 break
         return comment
 
+def main():
+    scanner = Scanner()
+    scanner.get_input_file("./input.txt")
+    # line number to list of tokens or errors
+    tokens: dict[int, list[tuple[TokenType, str]]] = {}
+    errors: dict[int, list[tuple[str, str]]] = {}
+    # Parse the input
+    while True:
+        try:
+            token = scanner.get_next_token()
+            if token == None:
+                break
+            if not scanner.line_number in tokens:
+                tokens[scanner.line_number] = []
+            tokens[scanner.line_number].append(token)
+        except SyntaxError as e:
+            if not scanner.line_number in errors:
+                errors[scanner.line_number] = []
+            errors[scanner.line_number].append(e.args[0])
+    # Write the result in file
+    with open("tokens.txt", "w") as tokens_file:
+        for line_number, token_list in sorted(tokens.items()):
+            tokens_file.write(f"{line_number}.\t")
+            for token in token_list:
+                if token[0] == TokenType.WHITESPACE or token[0] == TokenType.COMMENT:
+                    continue # skip whitespace and comment
+                tokens_file.write(f"({token[0].name} {token[1]}) ")
+            tokens_file.write("\n")
+    with open("lexical_errors.txt", "w") as lexical_errors_file:
+        if len(errors) == 0:
+            lexical_errors_file.write("There is no lexical error.")
+        else:
+            for line_number, errors_list in sorted(errors.items()):
+                lexical_errors_file.write(f"{line_number}.\t")
+                for error in errors_list:
+                    lexical_errors_file.write(f"({error[0]} {error[1]}) ")
+                lexical_errors_file.write("\n")
+    with open("symbol_table.txt", "w") as symbol_table_file:
+        for index, symbol in sorted(scanner.symbol_table.items()):
+            symbol_table_file.write(f"{index}.\t{symbol}\n")
 
-# Example
-scanner = Scanner()
-scanner.get_input_file("./input.txt")
-while True:
-    token = scanner.get_next_token()
-    if token == None:
-        break
-    print(scanner.line_number, token)
-print(scanner.symbol_table)
+if __name__ == "__main__":
+    main()
