@@ -118,8 +118,9 @@ class Scanner():
 
     def SYMBOL_DFA(self) -> str:
         other = self.TOKEN_TYPES[TokenType.NUM] + self.TOKEN_TYPES[TokenType.LETTER] + self.TOKEN_TYPES[TokenType.SYMBOL] + self.TOKEN_TYPES[TokenType.COMMENT] + self.TOKEN_TYPES[TokenType.WHITESPACE]
+        one_char_symbol = ['[', ']', '(', ')', '{', '}']
         # Check end of the line early
-        if len(self.current_line) == self.pointer_start + 1:
+        if len(self.current_line) == self.pointer_start + 1 or self.current_line[self.pointer_start] in one_char_symbol:
             self.pointer_end += 1
             return self.current_line[self.pointer_start]
         # We are not at the end of the line
