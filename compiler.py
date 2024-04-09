@@ -117,10 +117,8 @@ class Scanner():
         pass
 
     def SYMBOL_DFA(self) -> str:
-        other = self.TOKEN_TYPES[TokenType.NUM] + self.TOKEN_TYPES[TokenType.LETTER] + self.TOKEN_TYPES[TokenType.SYMBOL] + self.TOKEN_TYPES[TokenType.COMMENT] + self.TOKEN_TYPES[TokenType.WHITESPACE]
-        one_char_symbol = ['[', ']', '(', ')', '{', '}']
         # Check end of the line early
-        if len(self.current_line) == self.pointer_start + 1 or self.current_line[self.pointer_start] in one_char_symbol:
+        if len(self.current_line) == self.pointer_start + 1:
             self.pointer_end += 1
             return self.current_line[self.pointer_start]
         # We are not at the end of the line
@@ -130,9 +128,6 @@ class Scanner():
         elif self.current_line[self.pointer_start:self.pointer_start + 2] == "*/":
             self.pointer_end += 2
             raise SyntaxError(("*/", "Unmatched comment"))
-        elif not self.current_line[self.pointer_start + 1] in other:
-            self.pointer_end += 2
-            raise SyntaxError((self.current_line[self.pointer_start:self.pointer_start + 2], "Invalid input"))
         else:
             self.pointer_end += 1
             return self.current_line[self.pointer_start]
