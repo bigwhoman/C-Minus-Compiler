@@ -1,0 +1,99 @@
+Nonterminal,First,Follow,$,ID,;,[,NUM,],(,),int,void,",",{,},break,if,endif,else,for,return,=,<,==,+,-,*
+
+S,"$, int, void",,S ::= Program $,,,,,,,,S ::= Program $,S ::= Program $,,,,,,,,,,,,,,,
+
+Program,"int, void",$,Program ::= Declaration_list,,,,,,,,Program ::= Declaration_list,Program ::= Declaration_list,,,,,,,,,,,,,,,
+
+Declaration_list,"int, void","}, {, break, ;, if, for, return, ID, +, -, (, NUM, $",Declaration_list ::= '',Declaration_list ::= '',Declaration_list ::= '',,Declaration_list ::= '',,Declaration_list ::= '',,Declaration_list ::= Declaration Declaration_list,Declaration_list ::= Declaration Declaration_list,,Declaration_list ::= '',Declaration_list ::= '',Declaration_list ::= '',Declaration_list ::= '',,,Declaration_list ::= '',Declaration_list ::= '',,,,Declaration_list ::= '',Declaration_list ::= '',
+
+Declaration,"int, void","int, void, }, {, break, ;, if, for, return, ID, +, -, (, NUM, $",,,,,,,,,Declaration ::= Declaration_initial Declaration_prime,Declaration ::= Declaration_initial Declaration_prime,,,,,,,,,,,,,,,
+
+Declaration_initial,"int, void","(, ;, [, ), ,",,,,,,,,,Declaration_initial ::= Type_specifier ID,Declaration_initial ::= Type_specifier ID,,,,,,,,,,,,,,,
+
+Declaration_prime,"(, ;, [","int, void, }, {, break, ;, if, for, return, ID, +, -, (, NUM, $",,,Declaration_prime ::= Var_declaration_prime,Declaration_prime ::= Var_declaration_prime,,,Declaration_prime ::= Fun_declaration_prime,,,,,,,,,,,,,,,,,,
+
+Var_declaration_prime,";, [","int, void, }, {, break, ;, if, for, return, ID, +, -, (, NUM, $",,,Var_declaration_prime ::= ;,Var_declaration_prime ::= [ NUM ] ;,,,,,,,,,,,,,,,,,,,,,
+
+Fun_declaration_prime,(,"int, void, }, {, break, ;, if, for, return, ID, +, -, (, NUM, $",,,,,,,Fun_declaration_prime ::= ( Params ) Compound_stmt,,,,,,,,,,,,,,,,,,
+
+Type_specifier,"int, void",ID,,,,,,,,,Type_specifier ::= int,Type_specifier ::= void,,,,,,,,,,,,,,,
+
+Params,"int, void",),,,,,,,,,Params ::= int ID Param_prime Param_list,Params ::= void,,,,,,,,,,,,,,,
+
+Param_list,",",),,,,,,,,Param_list ::= '',,,"Param_list ::= , Param Param_list",,,,,,,,,,,,,,
+
+Param,"int, void","), ,",,,,,,,,,Param ::= Declaration_initial Param_prime,Param ::= Declaration_initial Param_prime,,,,,,,,,,,,,,,
+
+Param_prime,[,"), ,",,,,Param_prime ::= [ ],,,,Param_prime ::= '',,,Param_prime ::= '',,,,,,,,,,,,,,
+
+Compound_stmt,{,"int, void, }, {, break, ;, if, for, return, ID, +, -, (, NUM, $, endif, else",,,,,,,,,,,,Compound_stmt ::= { Declaration_list Statement_list },,,,,,,,,,,,,
+
+Statement_list,"{, break, ;, if, for, return, ID, +, -, (, NUM",},,Statement_list ::= Statement Statement_list,Statement_list ::= Statement Statement_list,,Statement_list ::= Statement Statement_list,,Statement_list ::= Statement Statement_list,,,,,Statement_list ::= Statement Statement_list,Statement_list ::= '',Statement_list ::= Statement Statement_list,Statement_list ::= Statement Statement_list,,,Statement_list ::= Statement Statement_list,Statement_list ::= Statement Statement_list,,,,Statement_list ::= Statement Statement_list,Statement_list ::= Statement Statement_list,
+
+Statement,"{, break, ;, if, for, return, ID, +, -, (, NUM","}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,Statement ::= Expression_stmt,Statement ::= Expression_stmt,,Statement ::= Expression_stmt,,Statement ::= Expression_stmt,,,,,Statement ::= Compound_stmt,,Statement ::= Expression_stmt,Statement ::= Selection_stmt,,,Statement ::= Iteration_stmt,Statement ::= Return_stmt,,,,Statement ::= Expression_stmt,Statement ::= Expression_stmt,
+
+Expression_stmt,"break, ;, ID, +, -, (, NUM","}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,Expression_stmt ::= Expression ;,Expression_stmt ::= ;,,Expression_stmt ::= Expression ;,,Expression_stmt ::= Expression ;,,,,,,,Expression_stmt ::= break ;,,,,,,,,,Expression_stmt ::= Expression ;,Expression_stmt ::= Expression ;,
+
+Selection_stmt,if,"}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,,,,,,,,,,,,,,Selection_stmt ::= if ( Expression ) Statement Else_stmt,,,,,,,,,,
+
+Else_stmt,"endif, else","}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,,,,,,,,,,,,,,,Else_stmt ::= endif,Else_stmt ::= else Statement endif,,,,,,,,
+
+Iteration_stmt,for,"}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,,,,,,,,,,,,,,,,,Iteration_stmt ::= for ( Expression ; Expression ; Expression ) Statement,,,,,,,
+
+Return_stmt,return,"}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,,,,,,,,,,,,,,,,,,Return_stmt ::= return Return_stmt_prime,,,,,,
+
+Return_stmt_prime,";, ID, +, -, (, NUM","}, {, break, ;, if, for, return, ID, +, -, (, NUM, endif, else",,Return_stmt_prime ::= Expression ;,Return_stmt_prime ::= ;,,Return_stmt_prime ::= Expression ;,,Return_stmt_prime ::= Expression ;,,,,,,,,,,,,,,,,Return_stmt_prime ::= Expression ;,Return_stmt_prime ::= Expression ;,
+
+Expression,"ID, +, -, (, NUM",";, ), ], ,",,Expression ::= ID B,,,Expression ::= Simple_expression_zegond,,Expression ::= Simple_expression_zegond,,,,,,,,,,,,,,,,Expression ::= Simple_expression_zegond,Expression ::= Simple_expression_zegond,
+
+B,"=, [, <, ==, *, +, -, (",";, ), ], ,",,,B ::= Simple_expression_prime,B ::= [ Expression ] H,,B ::= Simple_expression_prime,B ::= Simple_expression_prime,B ::= Simple_expression_prime,,,B ::= Simple_expression_prime,,,,,,,,,B ::= = Expression,B ::= Simple_expression_prime,B ::= Simple_expression_prime,B ::= Simple_expression_prime,B ::= Simple_expression_prime,B ::= Simple_expression_prime
+
+H,"=, *, +, -, <, ==",";, ), ], ,",,,H ::= G D C,,,H ::= G D C,,H ::= G D C,,,H ::= G D C,,,,,,,,,H ::= = Expression,H ::= G D C,H ::= G D C,H ::= G D C,H ::= G D C,H ::= G D C
+
+Simple_expression_zegond,"+, -, (, NUM",";, ), ], ,",,,,,Simple_expression_zegond ::= Additive_expression_zegond C,,Simple_expression_zegond ::= Additive_expression_zegond C,,,,,,,,,,,,,,,,Simple_expression_zegond ::= Additive_expression_zegond C,Simple_expression_zegond ::= Additive_expression_zegond C,
+
+Simple_expression_prime,"<, ==, *, +, -, (",";, ), ], ,",,,Simple_expression_prime ::= Additive_expression_prime C,,,Simple_expression_prime ::= Additive_expression_prime C,Simple_expression_prime ::= Additive_expression_prime C,Simple_expression_prime ::= Additive_expression_prime C,,,Simple_expression_prime ::= Additive_expression_prime C,,,,,,,,,,Simple_expression_prime ::= Additive_expression_prime C,Simple_expression_prime ::= Additive_expression_prime C,Simple_expression_prime ::= Additive_expression_prime C,Simple_expression_prime ::= Additive_expression_prime C,Simple_expression_prime ::= Additive_expression_prime C
+
+C,"<, ==",";, ), ], ,",,,C ::= '',,,C ::= '',,C ::= '',,,C ::= '',,,,,,,,,,C ::= Relop Additive_expression,C ::= Relop Additive_expression,,,
+
+Relop,"<, ==","+, -, (, ID, NUM",,,,,,,,,,,,,,,,,,,,,Relop ::= <,Relop ::= ==,,,
+
+Additive_expression,"+, -, (, ID, NUM",";, ), ], ,",,Additive_expression ::= Term D,,,Additive_expression ::= Term D,,Additive_expression ::= Term D,,,,,,,,,,,,,,,,Additive_expression ::= Term D,Additive_expression ::= Term D,
+
+Additive_expression_prime,"*, +, -, (",";, ), <, ==, ], ,",,,Additive_expression_prime ::= Term_prime D,,,Additive_expression_prime ::= Term_prime D,Additive_expression_prime ::= Term_prime D,Additive_expression_prime ::= Term_prime D,,,Additive_expression_prime ::= Term_prime D,,,,,,,,,,Additive_expression_prime ::= Term_prime D,Additive_expression_prime ::= Term_prime D,Additive_expression_prime ::= Term_prime D,Additive_expression_prime ::= Term_prime D,Additive_expression_prime ::= Term_prime D
+
+Additive_expression_zegond,"+, -, (, NUM",";, ), <, ==, ], ,",,,,,Additive_expression_zegond ::= Term_zegond D,,Additive_expression_zegond ::= Term_zegond D,,,,,,,,,,,,,,,,Additive_expression_zegond ::= Term_zegond D,Additive_expression_zegond ::= Term_zegond D,
+
+D,"+, -",";, ), <, ==, ], ,",,,D ::= '',,,D ::= '',,D ::= '',,,D ::= '',,,,,,,,,,D ::= '',D ::= '',D ::= Addop Term D,D ::= Addop Term D,
+
+Addop,"+, -","+, -, (, ID, NUM",,,,,,,,,,,,,,,,,,,,,,,Addop ::= +,Addop ::= -,
+
+Term,"+, -, (, ID, NUM",";, ), +, -, <, ==, ], ,",,Term ::= Signed_factor G,,,Term ::= Signed_factor G,,Term ::= Signed_factor G,,,,,,,,,,,,,,,,Term ::= Signed_factor G,Term ::= Signed_factor G,
+
+Term_prime,"*, (",";, ), <, ==, +, -, ], ,",,,Term_prime ::= Signed_factor_prime G,,,Term_prime ::= Signed_factor_prime G,Term_prime ::= Signed_factor_prime G,Term_prime ::= Signed_factor_prime G,,,Term_prime ::= Signed_factor_prime G,,,,,,,,,,Term_prime ::= Signed_factor_prime G,Term_prime ::= Signed_factor_prime G,Term_prime ::= Signed_factor_prime G,Term_prime ::= Signed_factor_prime G,Term_prime ::= Signed_factor_prime G
+
+Term_zegond,"+, -, (, NUM",";, ), <, ==, +, -, ], ,",,,,,Term_zegond ::= Signed_factor_zegond G,,Term_zegond ::= Signed_factor_zegond G,,,,,,,,,,,,,,,,Term_zegond ::= Signed_factor_zegond G,Term_zegond ::= Signed_factor_zegond G,
+
+G,*,";, ), <, ==, +, -, ], ,",,,G ::= '',,,G ::= '',,G ::= '',,,G ::= '',,,,,,,,,,G ::= '',G ::= '',G ::= '',G ::= '',G ::= * Signed_factor G
+
+Signed_factor,"+, -, (, ID, NUM",";, ), +, -, <, ==, *, ], ,",,Signed_factor ::= Factor,,,Signed_factor ::= Factor,,Signed_factor ::= Factor,,,,,,,,,,,,,,,,Signed_factor ::= + Factor,Signed_factor ::= - Factor,
+
+Signed_factor_prime,(,";, ), <, ==, +, -, *, ], ,",,,Signed_factor_prime ::= Factor_prime,,,Signed_factor_prime ::= Factor_prime,Signed_factor_prime ::= Factor_prime,Signed_factor_prime ::= Factor_prime,,,Signed_factor_prime ::= Factor_prime,,,,,,,,,,Signed_factor_prime ::= Factor_prime,Signed_factor_prime ::= Factor_prime,Signed_factor_prime ::= Factor_prime,Signed_factor_prime ::= Factor_prime,Signed_factor_prime ::= Factor_prime
+
+Signed_factor_zegond,"+, -, (, NUM",";, ), <, ==, +, -, *, ], ,",,,,,Signed_factor_zegond ::= Factor_zegond,,Signed_factor_zegond ::= Factor_zegond,,,,,,,,,,,,,,,,Signed_factor_zegond ::= + Factor,Signed_factor_zegond ::= - Factor,
+
+Factor,"(, ID, NUM",";, ), +, -, <, ==, *, ], ,",,Factor ::= ID Var_call_prime,,,Factor ::= NUM,,Factor ::= ( Expression ),,,,,,,,,,,,,,,,,,
+
+Var_call_prime,"(, [",";, ), +, -, <, ==, *, ], ,",,,Var_call_prime ::= Var_prime,Var_call_prime ::= Var_prime,,Var_call_prime ::= Var_prime,Var_call_prime ::= ( Args ),Var_call_prime ::= Var_prime,,,Var_call_prime ::= Var_prime,,,,,,,,,,Var_call_prime ::= Var_prime,Var_call_prime ::= Var_prime,Var_call_prime ::= Var_prime,Var_call_prime ::= Var_prime,Var_call_prime ::= Var_prime
+
+Var_prime,[,";, ), +, -, <, ==, *, ], ,",,,Var_prime ::= '',Var_prime ::= [ Expression ],,Var_prime ::= '',,Var_prime ::= '',,,Var_prime ::= '',,,,,,,,,,Var_prime ::= '',Var_prime ::= '',Var_prime ::= '',Var_prime ::= '',Var_prime ::= ''
+
+Factor_prime,(,";, ), <, ==, +, -, *, ], ,",,,Factor_prime ::= '',,,Factor_prime ::= '',Factor_prime ::= ( Args ),Factor_prime ::= '',,,Factor_prime ::= '',,,,,,,,,,Factor_prime ::= '',Factor_prime ::= '',Factor_prime ::= '',Factor_prime ::= '',Factor_prime ::= ''
+
+Factor_zegond,"(, NUM",";, ), <, ==, +, -, *, ], ,",,,,,Factor_zegond ::= NUM,,Factor_zegond ::= ( Expression ),,,,,,,,,,,,,,,,,,
+
+Args,"ID, +, -, (, NUM",),,Args ::= Arg_list,,,Args ::= Arg_list,,Args ::= Arg_list,Args ::= '',,,,,,,,,,,,,,,Args ::= Arg_list,Args ::= Arg_list,
+
+Arg_list,"ID, +, -, (, NUM",),,Arg_list ::= Expression Arg_list_prime,,,Arg_list ::= Expression Arg_list_prime,,Arg_list ::= Expression Arg_list_prime,,,,,,,,,,,,,,,,Arg_list ::= Expression Arg_list_prime,Arg_list ::= Expression Arg_list_prime,
+
+Arg_list_prime,",",),,,,,,,,Arg_list_prime ::= '',,,"Arg_list_prime ::= , Expression Arg_list_prime",,,,,,,,,,,,,,
