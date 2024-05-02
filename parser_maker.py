@@ -43,7 +43,8 @@ df = pandas.read_csv('parse_table.csv')
 df.fillna("", inplace=True)
 # df = df.map(remove_brackets)
 df = df.map(remove_tt)
-df = df.map(change_commas)
+df["First"] = df["First"].map(change_commas)
+df["Follow"] = df["Follow"].map(change_commas)
 df = df.map(change_epsilon)
 
 terminals = [
@@ -120,14 +121,14 @@ for index, row in df.iterrows():
         temporal_body = ""
         if key.strip() == '' :
             temporal_body = f"""
-\t\tprint('Invalid character at {row["Nonterminal"]}')
+\t\tprint('Invalid character at {row["Nonterminal"]}', lookahead)
 \t\tlookahead = get_next_token()
-\t\t{row["Nonterminal"]}()
+\t\t{row["Nonterminal"]}(parent)
 \t\treturn
 """
         elif key.strip() == 'Synch' :
             temporal_body = f"""
-\t\tprint('Missing character at {row["Nonterminal"]}')
+\t\tprint('Missing character at {row["Nonterminal"]}', lookahead)
 \t\treturn
 """           
         elif key.strip() == 'EPSILON' :

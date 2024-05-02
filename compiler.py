@@ -6,6 +6,7 @@ import c_parser
 import scanner
 
 def save_parse_tree(program: anytree.Node):
+    anytree.Node("$", program) # Currently, we add $ to S not Program itself!
     with open("parse_tree.txt", "w", encoding="utf-8") as parse_tree:
         for pre, _, node in anytree.RenderTree(program):
             parse_tree.write("%s%s\n" % (pre, node.name))
