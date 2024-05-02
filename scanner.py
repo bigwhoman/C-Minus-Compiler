@@ -35,6 +35,11 @@ class Scanner():
         self.pointer_end = 0
         self.file = open(input)
 
+    def get_current_scanner_lookahead_str(self) -> str:
+        if self.lookahead_token == None:
+            return "$"
+        return f"({self.lookahead_token[0].name}, {self.lookahead_token[1]})"
+
     def get_lookahead_token(self) -> str:
         self.lookahead_token = self.get_next_token()
         if self.lookahead_token == None:

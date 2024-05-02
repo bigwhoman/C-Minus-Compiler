@@ -71,8 +71,9 @@ ffff.write(df.to_string())
 
 
 func_template = """
-def {func}() :
+def {func}(parent: anytree.Node) :
 \tglobal lookahead
+\tcurrent_node = anytree.Node("{func}".replace("_", "-"), parent=parent)
     {func_body}
     
 """
@@ -80,15 +81,18 @@ func_bode_template = """
 \tif lookahead in {terminal_list} :
 {do_sth}
 """
-all_code = """lookahead = ""
-def dummy_get_next_token():
+all_code = """import anytree
+lookahead = ""
+def dummy_function():
 \traise Exception("Please implement")
-get_next_token = dummy_get_next_token # override this first class function
+get_next_token = dummy_function # override this first class function
+get_scanner_lookahead = dummy_function # override this first class function
 """
 match_function = """
-def Match(expected_token : str) :
+def Match(expected_token : str, parent: anytree.Node) :
     global lookahead
     if lookahead == expected_token :
+        anytree.Node(get_scanner_lookahead(), parent=parent)
         lookahead = get_next_token()
     else :
         print("Missing input ...")
@@ -116,26 +120,29 @@ for index, row in df.iterrows():
         temporal_body = ""
         if key.strip() == '' :
             temporal_body = f"""
-\t\tprint('Invalid character at ...')
+\t\tprint('Invalid character at {row["Nonterminal"]}')
 \t\tlookahead = get_next_token()
 \t\t{row["Nonterminal"]}()
+\t\treturn
 """
         elif key.strip() == 'Synch' :
             temporal_body = f"""
-\t\tprint('Missing character at ...')
+\t\tprint('Missing character at {row["Nonterminal"]}')
 \t\treturn
 """           
         elif key.strip() == 'EPSILON' :
             temporal_body = f"""
+\t\tanytree.Node("epsilon", parent=current_node)
 \t\treturn
 """
         else :
             tokens = key.split()
             for token in tokens :
                 if token in terminals :
-                    temporal_body += f"\t\tMatch('{token}')\n"
+                    temporal_body += f"\t\tMatch('{token}', current_node)\n"
                 elif token in non_terminals :
-                    temporal_body += f"\t\t{token}()\n"
+                    temporal_body += f"\t\t{token}(current_node)\n"
+            temporal_body += "\t\treturn"
         func_body += tt.format(terminal_list=classification[key], do_sth=temporal_body)
     func = func_template.format(func=row["Nonterminal"], func_body=func_body)
     # print(func)
