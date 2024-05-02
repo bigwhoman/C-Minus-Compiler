@@ -72,6 +72,7 @@ ffff.write(df.to_string())
 
 func_template = """
 def {func}() :
+\tglobal lookahead
     {func_body}
     
 """
@@ -79,9 +80,14 @@ func_bode_template = """
 \tif lookahead in {terminal_list} :
 {do_sth}
 """
-all_code = ""
+all_code = """lookahead = ""
+def dummy_get_next_token():
+\traise Exception("Please implement")
+get_next_token = dummy_get_next_token # override this first class function
+"""
 match_function = """
 def Match(expected_token : str) :
+    global lookahead
     if lookahead == expected_token :
         lookahead = get_next_token()
     else :

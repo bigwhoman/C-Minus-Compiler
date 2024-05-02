@@ -1,11 +1,18 @@
+lookahead = ""
+def dummy_get_next_token():
+	raise Exception("Please implement")
+get_next_token = dummy_get_next_token # override this first class function
 
 def Match(expected_token : str) :
+    global lookahead
+    print("Matching", expected_token)
     if lookahead == expected_token :
         lookahead = get_next_token()
     else :
         print("Missing input ...")
 
 def S() :
+	global lookahead
     
 	if lookahead in ['$', 'int', 'void'] :
 		Program()
@@ -22,6 +29,7 @@ def S() :
     
 
 def Program() :
+	global lookahead
     
 	if lookahead in ['$', 'int', 'void'] :
 		Declaration_list()
@@ -37,6 +45,7 @@ def Program() :
     
 
 def Declaration_list() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
@@ -58,6 +67,7 @@ def Declaration_list() :
     
 
 def Declaration() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
@@ -80,6 +90,7 @@ def Declaration() :
     
 
 def Declaration_initial() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', 'NUM', ']', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
@@ -102,6 +113,7 @@ def Declaration_initial() :
     
 
 def Declaration_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
@@ -127,6 +139,7 @@ def Declaration_prime() :
     
 
 def Var_declaration_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
@@ -155,6 +168,7 @@ def Var_declaration_prime() :
     
 
 def Fun_declaration_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
@@ -179,6 +193,7 @@ def Fun_declaration_prime() :
     
 
 def Type_specifier() :
+	global lookahead
     
 	if lookahead in ['$', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
@@ -204,6 +219,7 @@ def Type_specifier() :
     
 
 def Params() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
@@ -232,6 +248,7 @@ def Params() :
     
 
 def Param_list() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
@@ -253,6 +270,7 @@ def Param_list() :
     
 
 def Param() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
@@ -275,6 +293,7 @@ def Param() :
     
 
 def Param_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
@@ -296,6 +315,7 @@ def Param_prime() :
     
 
 def Compound_stmt() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', 'int', 'void', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '+', '-'] :
 
@@ -320,6 +340,7 @@ def Compound_stmt() :
     
 
 def Statement_list() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
@@ -341,6 +362,7 @@ def Statement_list() :
     
 
 def Statement() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -378,6 +400,7 @@ def Statement() :
     
 
 def Expression_stmt() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -409,6 +432,7 @@ def Expression_stmt() :
     
 
 def Selection_stmt() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -435,6 +459,7 @@ def Selection_stmt() :
     
 
 def Else_stmt() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -462,6 +487,7 @@ def Else_stmt() :
     
 
 def Iteration_stmt() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -491,6 +517,7 @@ def Iteration_stmt() :
     
 
 def Return_stmt() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -513,6 +540,7 @@ def Return_stmt() :
     
 
 def Return_stmt_prime() :
+	global lookahead
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
@@ -539,6 +567,7 @@ def Return_stmt_prime() :
     
 
 def Expression() :
+	global lookahead
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
@@ -565,6 +594,7 @@ def Expression() :
     
 
 def B() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
@@ -592,6 +622,7 @@ def B() :
     
 
 def H() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
@@ -614,6 +645,7 @@ def H() :
     
 
 def Simple_expression_zegond() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
@@ -636,6 +668,7 @@ def Simple_expression_zegond() :
     
 
 def Simple_expression_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -652,6 +685,7 @@ def Simple_expression_prime() :
     
 
 def C() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '+', '-', '*'] :
 
@@ -673,6 +707,7 @@ def C() :
     
 
 def Relop() :
+	global lookahead
     
 	if lookahead in ['$', ';', '[', ']', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
@@ -698,6 +733,7 @@ def Relop() :
     
 
 def Additive_expression() :
+	global lookahead
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
@@ -720,6 +756,7 @@ def Additive_expression() :
     
 
 def Additive_expression_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -736,6 +773,7 @@ def Additive_expression_prime() :
     
 
 def Additive_expression_zegond() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
@@ -758,6 +796,7 @@ def Additive_expression_zegond() :
     
 
 def D() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
@@ -780,6 +819,7 @@ def D() :
     
 
 def Addop() :
+	global lookahead
     
 	if lookahead in ['$', ';', '[', ']', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
@@ -805,6 +845,7 @@ def Addop() :
     
 
 def Term() :
+	global lookahead
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
@@ -827,6 +868,7 @@ def Term() :
     
 
 def Term_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -843,6 +885,7 @@ def Term_prime() :
     
 
 def Term_zegond() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
@@ -865,6 +908,7 @@ def Term_zegond() :
     
 
 def G() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -887,6 +931,7 @@ def G() :
     
 
 def Signed_factor() :
+	global lookahead
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -918,6 +963,7 @@ def Signed_factor() :
     
 
 def Signed_factor_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -933,6 +979,7 @@ def Signed_factor_prime() :
     
 
 def Signed_factor_zegond() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -964,6 +1011,7 @@ def Signed_factor_zegond() :
     
 
 def Factor() :
+	global lookahead
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -996,6 +1044,7 @@ def Factor() :
     
 
 def Var_call_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -1017,6 +1066,7 @@ def Var_call_prime() :
     
 
 def Var_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -1039,6 +1089,7 @@ def Var_prime() :
     
 
 def Factor_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -1061,6 +1112,7 @@ def Factor_prime() :
     
 
 def Factor_zegond() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
@@ -1088,6 +1140,7 @@ def Factor_zegond() :
     
 
 def Args() :
+	global lookahead
     
 	if lookahead in ['$', ';', '[', ']', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
@@ -1108,6 +1161,7 @@ def Args() :
     
 
 def Arg_list() :
+	global lookahead
     
 	if lookahead in ['$', ';', '[', ']', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
@@ -1130,6 +1184,7 @@ def Arg_list() :
     
 
 def Arg_list_prime() :
+	global lookahead
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
