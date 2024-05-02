@@ -96,7 +96,7 @@ def Match(expected_token : str, parent: anytree.Node) :
         anytree.Node(get_scanner_lookahead(), parent=parent)
         lookahead = get_next_token()
     else :
-        print("Missing input ...")
+        print("Missing ", expected_token)
 """
 all_code += match_function
 
@@ -121,13 +121,15 @@ for index, row in df.iterrows():
         temporal_body = ""
         if key.strip() == '' :
             temporal_body = f"""
-\t\tprint('Invalid character at {row["Nonterminal"]}', lookahead)
+\t\tcurrent_node.parent = None
+\t\tprint('Illegal character at {row["Nonterminal"]}', lookahead)
 \t\tlookahead = get_next_token()
 \t\t{row["Nonterminal"]}(parent)
 \t\treturn
 """
         elif key.strip() == 'Synch' :
             temporal_body = f"""
+\t\tcurrent_node.parent = None
 \t\tprint('Missing character at {row["Nonterminal"]}', lookahead)
 \t\treturn
 """           

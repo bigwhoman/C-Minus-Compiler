@@ -11,7 +11,7 @@ def Match(expected_token : str, parent: anytree.Node) :
         anytree.Node(get_scanner_lookahead(), parent=parent)
         lookahead = get_next_token()
     else :
-        print("Missing input ...")
+        print("Missing ", expected_token)
 
 def S(parent: anytree.Node) :
 	global lookahead
@@ -24,7 +24,8 @@ def S(parent: anytree.Node) :
 
 	if lookahead in ['ID', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at S', lookahead)
+		current_node.parent = None
+		print('Illegal character at S', lookahead)
 		lookahead = get_next_token()
 		S(parent)
 		return
@@ -42,7 +43,8 @@ def Program(parent: anytree.Node) :
 
 	if lookahead in ['ID', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Program', lookahead)
+		current_node.parent = None
+		print('Illegal character at Program', lookahead)
 		lookahead = get_next_token()
 		Program(parent)
 		return
@@ -62,7 +64,8 @@ def Declaration_list(parent: anytree.Node) :
 
 	if lookahead in ['[', ']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
-		print('Invalid character at Declaration_list', lookahead)
+		current_node.parent = None
+		print('Illegal character at Declaration_list', lookahead)
 		lookahead = get_next_token()
 		Declaration_list(parent)
 		return
@@ -81,13 +84,15 @@ def Declaration(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Declaration', lookahead)
 		return
 
 
 	if lookahead in ['[', ']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
-		print('Invalid character at Declaration', lookahead)
+		current_node.parent = None
+		print('Illegal character at Declaration', lookahead)
 		lookahead = get_next_token()
 		Declaration(parent)
 		return
@@ -106,7 +111,8 @@ def Declaration_initial(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', 'NUM', ']', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Declaration_initial', lookahead)
+		current_node.parent = None
+		print('Illegal character at Declaration_initial', lookahead)
 		lookahead = get_next_token()
 		Declaration_initial(parent)
 		return
@@ -114,6 +120,7 @@ def Declaration_initial(parent: anytree.Node) :
 
 	if lookahead in [';', '[', '(', ')', ','] :
 
+		current_node.parent = None
 		print('Missing character at Declaration_initial', lookahead)
 		return
 
@@ -131,6 +138,7 @@ def Declaration_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Declaration_prime', lookahead)
 		return
 
@@ -141,7 +149,8 @@ def Declaration_prime(parent: anytree.Node) :
 
 	if lookahead in [']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
-		print('Invalid character at Declaration_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Declaration_prime', lookahead)
 		lookahead = get_next_token()
 		Declaration_prime(parent)
 		return
@@ -159,6 +168,7 @@ def Var_declaration_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Var_declaration_prime', lookahead)
 		return
 
@@ -176,7 +186,8 @@ def Var_declaration_prime(parent: anytree.Node) :
 
 	if lookahead in [']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
-		print('Invalid character at Var_declaration_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Var_declaration_prime', lookahead)
 		lookahead = get_next_token()
 		Var_declaration_prime(parent)
 		return
@@ -190,13 +201,15 @@ def Fun_declaration_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Fun_declaration_prime', lookahead)
 		return
 
 
 	if lookahead in ['[', ']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
-		print('Invalid character at Fun_declaration_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Fun_declaration_prime', lookahead)
 		lookahead = get_next_token()
 		Fun_declaration_prime(parent)
 		return
@@ -217,7 +230,8 @@ def Type_specifier(parent: anytree.Node) :
     
 	if lookahead in ['$', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Type_specifier', lookahead)
+		current_node.parent = None
+		print('Illegal character at Type_specifier', lookahead)
 		lookahead = get_next_token()
 		Type_specifier(parent)
 		return
@@ -225,6 +239,7 @@ def Type_specifier(parent: anytree.Node) :
 
 	if lookahead in ['ID'] :
 
+		current_node.parent = None
 		print('Missing character at Type_specifier', lookahead)
 		return
 
@@ -245,7 +260,8 @@ def Params(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Params', lookahead)
+		current_node.parent = None
+		print('Illegal character at Params', lookahead)
 		lookahead = get_next_token()
 		Params(parent)
 		return
@@ -253,6 +269,7 @@ def Params(parent: anytree.Node) :
 
 	if lookahead in [')'] :
 
+		current_node.parent = None
 		print('Missing character at Params', lookahead)
 		return
 
@@ -276,7 +293,8 @@ def Param_list(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Param_list', lookahead)
+		current_node.parent = None
+		print('Illegal character at Param_list', lookahead)
 		lookahead = get_next_token()
 		Param_list(parent)
 		return
@@ -302,7 +320,8 @@ def Param(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Param', lookahead)
+		current_node.parent = None
+		print('Illegal character at Param', lookahead)
 		lookahead = get_next_token()
 		Param(parent)
 		return
@@ -310,6 +329,7 @@ def Param(parent: anytree.Node) :
 
 	if lookahead in [')', ','] :
 
+		current_node.parent = None
 		print('Missing character at Param', lookahead)
 		return
 
@@ -327,7 +347,8 @@ def Param_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Param_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Param_prime', lookahead)
 		lookahead = get_next_token()
 		Param_prime(parent)
 		return
@@ -352,13 +373,15 @@ def Compound_stmt(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', 'int', 'void', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Compound_stmt', lookahead)
 		return
 
 
 	if lookahead in ['[', ']', ')', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Compound_stmt', lookahead)
+		current_node.parent = None
+		print('Illegal character at Compound_stmt', lookahead)
 		lookahead = get_next_token()
 		Compound_stmt(parent)
 		return
@@ -379,7 +402,8 @@ def Statement_list(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
-		print('Invalid character at Statement_list', lookahead)
+		current_node.parent = None
+		print('Illegal character at Statement_list', lookahead)
 		lookahead = get_next_token()
 		Statement_list(parent)
 		return
@@ -404,7 +428,8 @@ def Statement(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Statement', lookahead)
+		current_node.parent = None
+		print('Illegal character at Statement', lookahead)
 		lookahead = get_next_token()
 		Statement(parent)
 		return
@@ -420,6 +445,7 @@ def Statement(parent: anytree.Node) :
 
 	if lookahead in ['}', 'endif', 'else'] :
 
+		current_node.parent = None
 		print('Missing character at Statement', lookahead)
 		return
 
@@ -444,7 +470,8 @@ def Expression_stmt(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Expression_stmt', lookahead)
+		current_node.parent = None
+		print('Illegal character at Expression_stmt', lookahead)
 		lookahead = get_next_token()
 		Expression_stmt(parent)
 		return
@@ -461,6 +488,7 @@ def Expression_stmt(parent: anytree.Node) :
 
 	if lookahead in ['{', '}', 'if', 'endif', 'else', 'for', 'return'] :
 
+		current_node.parent = None
 		print('Missing character at Expression_stmt', lookahead)
 		return
 
@@ -478,7 +506,8 @@ def Selection_stmt(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Selection_stmt', lookahead)
+		current_node.parent = None
+		print('Illegal character at Selection_stmt', lookahead)
 		lookahead = get_next_token()
 		Selection_stmt(parent)
 		return
@@ -486,6 +515,7 @@ def Selection_stmt(parent: anytree.Node) :
 
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'endif', 'else', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Selection_stmt', lookahead)
 		return
 
@@ -507,7 +537,8 @@ def Else_stmt(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Else_stmt', lookahead)
+		current_node.parent = None
+		print('Illegal character at Else_stmt', lookahead)
 		lookahead = get_next_token()
 		Else_stmt(parent)
 		return
@@ -515,6 +546,7 @@ def Else_stmt(parent: anytree.Node) :
 
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Else_stmt', lookahead)
 		return
 
@@ -537,7 +569,8 @@ def Iteration_stmt(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Iteration_stmt', lookahead)
+		current_node.parent = None
+		print('Illegal character at Iteration_stmt', lookahead)
 		lookahead = get_next_token()
 		Iteration_stmt(parent)
 		return
@@ -545,6 +578,7 @@ def Iteration_stmt(parent: anytree.Node) :
 
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else', 'return', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Iteration_stmt', lookahead)
 		return
 
@@ -569,7 +603,8 @@ def Return_stmt(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Return_stmt', lookahead)
+		current_node.parent = None
+		print('Illegal character at Return_stmt', lookahead)
 		lookahead = get_next_token()
 		Return_stmt(parent)
 		return
@@ -577,6 +612,7 @@ def Return_stmt(parent: anytree.Node) :
 
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else', 'for', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Return_stmt', lookahead)
 		return
 
@@ -594,7 +630,8 @@ def Return_stmt_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
-		print('Invalid character at Return_stmt_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Return_stmt_prime', lookahead)
 		lookahead = get_next_token()
 		Return_stmt_prime(parent)
 		return
@@ -611,6 +648,7 @@ def Return_stmt_prime(parent: anytree.Node) :
 
 	if lookahead in ['{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
+		current_node.parent = None
 		print('Missing character at Return_stmt_prime', lookahead)
 		return
 
@@ -623,7 +661,8 @@ def Expression(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
-		print('Invalid character at Expression', lookahead)
+		current_node.parent = None
+		print('Illegal character at Expression', lookahead)
 		lookahead = get_next_token()
 		Expression(parent)
 		return
@@ -636,6 +675,7 @@ def Expression(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ','] :
 
+		current_node.parent = None
 		print('Missing character at Expression', lookahead)
 		return
 
@@ -652,7 +692,8 @@ def B(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
-		print('Invalid character at B', lookahead)
+		current_node.parent = None
+		print('Illegal character at B', lookahead)
 		lookahead = get_next_token()
 		B(parent)
 		return
@@ -682,7 +723,8 @@ def H(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
-		print('Invalid character at H', lookahead)
+		current_node.parent = None
+		print('Illegal character at H', lookahead)
 		lookahead = get_next_token()
 		H(parent)
 		return
@@ -707,7 +749,8 @@ def Simple_expression_zegond(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
-		print('Invalid character at Simple_expression_zegond', lookahead)
+		current_node.parent = None
+		print('Illegal character at Simple_expression_zegond', lookahead)
 		lookahead = get_next_token()
 		Simple_expression_zegond(parent)
 		return
@@ -715,6 +758,7 @@ def Simple_expression_zegond(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ','] :
 
+		current_node.parent = None
 		print('Missing character at Simple_expression_zegond', lookahead)
 		return
 
@@ -732,7 +776,8 @@ def Simple_expression_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Simple_expression_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Simple_expression_prime', lookahead)
 		lookahead = get_next_token()
 		Simple_expression_prime(parent)
 		return
@@ -751,7 +796,8 @@ def C(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '+', '-', '*'] :
 
-		print('Invalid character at C', lookahead)
+		current_node.parent = None
+		print('Illegal character at C', lookahead)
 		lookahead = get_next_token()
 		C(parent)
 		return
@@ -776,7 +822,8 @@ def Relop(parent: anytree.Node) :
     
 	if lookahead in ['$', ';', '[', ']', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
-		print('Invalid character at Relop', lookahead)
+		current_node.parent = None
+		print('Illegal character at Relop', lookahead)
 		lookahead = get_next_token()
 		Relop(parent)
 		return
@@ -784,6 +831,7 @@ def Relop(parent: anytree.Node) :
 
 	if lookahead in ['ID', 'NUM', '(', '+', '-'] :
 
+		current_node.parent = None
 		print('Missing character at Relop', lookahead)
 		return
 
@@ -804,7 +852,8 @@ def Additive_expression(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
-		print('Invalid character at Additive_expression', lookahead)
+		current_node.parent = None
+		print('Illegal character at Additive_expression', lookahead)
 		lookahead = get_next_token()
 		Additive_expression(parent)
 		return
@@ -817,6 +866,7 @@ def Additive_expression(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ','] :
 
+		current_node.parent = None
 		print('Missing character at Additive_expression', lookahead)
 		return
 
@@ -829,7 +879,8 @@ def Additive_expression_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Additive_expression_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Additive_expression_prime', lookahead)
 		lookahead = get_next_token()
 		Additive_expression_prime(parent)
 		return
@@ -848,7 +899,8 @@ def Additive_expression_zegond(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
-		print('Invalid character at Additive_expression_zegond', lookahead)
+		current_node.parent = None
+		print('Illegal character at Additive_expression_zegond', lookahead)
 		lookahead = get_next_token()
 		Additive_expression_zegond(parent)
 		return
@@ -856,6 +908,7 @@ def Additive_expression_zegond(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '=='] :
 
+		current_node.parent = None
 		print('Missing character at Additive_expression_zegond', lookahead)
 		return
 
@@ -873,7 +926,8 @@ def D(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
-		print('Invalid character at D', lookahead)
+		current_node.parent = None
+		print('Illegal character at D', lookahead)
 		lookahead = get_next_token()
 		D(parent)
 		return
@@ -899,7 +953,8 @@ def Addop(parent: anytree.Node) :
     
 	if lookahead in ['$', ';', '[', ']', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
-		print('Invalid character at Addop', lookahead)
+		current_node.parent = None
+		print('Illegal character at Addop', lookahead)
 		lookahead = get_next_token()
 		Addop(parent)
 		return
@@ -907,6 +962,7 @@ def Addop(parent: anytree.Node) :
 
 	if lookahead in ['ID', 'NUM', '('] :
 
+		current_node.parent = None
 		print('Missing character at Addop', lookahead)
 		return
 
@@ -927,7 +983,8 @@ def Term(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
-		print('Invalid character at Term', lookahead)
+		current_node.parent = None
+		print('Illegal character at Term', lookahead)
 		lookahead = get_next_token()
 		Term(parent)
 		return
@@ -940,6 +997,7 @@ def Term(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '=='] :
 
+		current_node.parent = None
 		print('Missing character at Term', lookahead)
 		return
 
@@ -952,7 +1010,8 @@ def Term_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Term_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Term_prime', lookahead)
 		lookahead = get_next_token()
 		Term_prime(parent)
 		return
@@ -971,7 +1030,8 @@ def Term_zegond(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
-		print('Invalid character at Term_zegond', lookahead)
+		current_node.parent = None
+		print('Illegal character at Term_zegond', lookahead)
 		lookahead = get_next_token()
 		Term_zegond(parent)
 		return
@@ -979,6 +1039,7 @@ def Term_zegond(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '=='] :
 
+		current_node.parent = None
 		print('Missing character at Term_zegond', lookahead)
 		return
 
@@ -996,7 +1057,8 @@ def G(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at G', lookahead)
+		current_node.parent = None
+		print('Illegal character at G', lookahead)
 		lookahead = get_next_token()
 		G(parent)
 		return
@@ -1022,7 +1084,8 @@ def Signed_factor(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Signed_factor', lookahead)
+		current_node.parent = None
+		print('Illegal character at Signed_factor', lookahead)
 		lookahead = get_next_token()
 		Signed_factor(parent)
 		return
@@ -1034,6 +1097,7 @@ def Signed_factor(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '==', '*'] :
 
+		current_node.parent = None
 		print('Missing character at Signed_factor', lookahead)
 		return
 
@@ -1056,7 +1120,8 @@ def Signed_factor_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Signed_factor_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Signed_factor_prime', lookahead)
 		lookahead = get_next_token()
 		Signed_factor_prime(parent)
 		return
@@ -1074,7 +1139,8 @@ def Signed_factor_zegond(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Signed_factor_zegond', lookahead)
+		current_node.parent = None
+		print('Illegal character at Signed_factor_zegond', lookahead)
 		lookahead = get_next_token()
 		Signed_factor_zegond(parent)
 		return
@@ -1082,6 +1148,7 @@ def Signed_factor_zegond(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '==', '*'] :
 
+		current_node.parent = None
 		print('Missing character at Signed_factor_zegond', lookahead)
 		return
 
@@ -1108,7 +1175,8 @@ def Factor(parent: anytree.Node) :
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Factor', lookahead)
+		current_node.parent = None
+		print('Illegal character at Factor', lookahead)
 		lookahead = get_next_token()
 		Factor(parent)
 		return
@@ -1121,6 +1189,7 @@ def Factor(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '==', '+', '-', '*'] :
 
+		current_node.parent = None
 		print('Missing character at Factor', lookahead)
 		return
 
@@ -1143,7 +1212,8 @@ def Var_call_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Var_call_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Var_call_prime', lookahead)
 		lookahead = get_next_token()
 		Var_call_prime(parent)
 		return
@@ -1167,7 +1237,8 @@ def Var_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Var_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Var_prime', lookahead)
 		lookahead = get_next_token()
 		Var_prime(parent)
 		return
@@ -1193,7 +1264,8 @@ def Factor_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Factor_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Factor_prime', lookahead)
 		lookahead = get_next_token()
 		Factor_prime(parent)
 		return
@@ -1219,7 +1291,8 @@ def Factor_zegond(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
-		print('Invalid character at Factor_zegond', lookahead)
+		current_node.parent = None
+		print('Illegal character at Factor_zegond', lookahead)
 		lookahead = get_next_token()
 		Factor_zegond(parent)
 		return
@@ -1227,6 +1300,7 @@ def Factor_zegond(parent: anytree.Node) :
 
 	if lookahead in [';', ']', ')', ',', '<', '==', '+', '-', '*'] :
 
+		current_node.parent = None
 		print('Missing character at Factor_zegond', lookahead)
 		return
 
@@ -1249,7 +1323,8 @@ def Args(parent: anytree.Node) :
     
 	if lookahead in ['$', ';', '[', ']', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
-		print('Invalid character at Args', lookahead)
+		current_node.parent = None
+		print('Illegal character at Args', lookahead)
 		lookahead = get_next_token()
 		Args(parent)
 		return
@@ -1273,7 +1348,8 @@ def Arg_list(parent: anytree.Node) :
     
 	if lookahead in ['$', ';', '[', ']', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
-		print('Invalid character at Arg_list', lookahead)
+		current_node.parent = None
+		print('Illegal character at Arg_list', lookahead)
 		lookahead = get_next_token()
 		Arg_list(parent)
 		return
@@ -1286,6 +1362,7 @@ def Arg_list(parent: anytree.Node) :
 
 	if lookahead in [')'] :
 
+		current_node.parent = None
 		print('Missing character at Arg_list', lookahead)
 		return
 
@@ -1298,7 +1375,8 @@ def Arg_list_prime(parent: anytree.Node) :
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
-		print('Invalid character at Arg_list_prime', lookahead)
+		current_node.parent = None
+		print('Illegal character at Arg_list_prime', lookahead)
 		lookahead = get_next_token()
 		Arg_list_prime(parent)
 		return

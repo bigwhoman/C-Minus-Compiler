@@ -41,7 +41,10 @@ class Scanner():
         return f"({self.lookahead_token[0].name}, {self.lookahead_token[1]})"
 
     def get_lookahead_token(self) -> str:
-        self.lookahead_token = self.get_next_token()
+        try:
+            self.lookahead_token = self.get_next_token()
+        except SyntaxError:
+            return self.get_lookahead_token()
         if self.lookahead_token == None:
             return "$" # EOF
         if self.lookahead_token[0] == TokenType.NUM:
