@@ -124,8 +124,7 @@ for index, row in df.iterrows():
 \t\tcurrent_node.parent = None
 \t\tprint('Illegal character at {row["Nonterminal"]}', lookahead)
 \t\tif lookahead == '$' :
-\t\t\tprint("Unexpected EOF")
-\t\t\texit()
+\t\t\traise SyntaxError("Unexpected EOF")
 \t\tlookahead = get_next_token()
 \t\t{row["Nonterminal"]}(parent)
 \t\treturn

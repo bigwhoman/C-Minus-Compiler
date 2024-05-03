@@ -27,8 +27,7 @@ def S(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at S', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		S(parent)
 		return
@@ -49,8 +48,7 @@ def Program(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Program', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Program(parent)
 		return
@@ -73,8 +71,7 @@ def Declaration_list(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Declaration_list', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Declaration_list(parent)
 		return
@@ -103,8 +100,7 @@ def Declaration(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Declaration', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Declaration(parent)
 		return
@@ -126,8 +122,7 @@ def Declaration_initial(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Declaration_initial', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Declaration_initial(parent)
 		return
@@ -167,8 +162,7 @@ def Declaration_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Declaration_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Declaration_prime(parent)
 		return
@@ -207,8 +201,7 @@ def Var_declaration_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Var_declaration_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Var_declaration_prime(parent)
 		return
@@ -232,8 +225,7 @@ def Fun_declaration_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Fun_declaration_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Fun_declaration_prime(parent)
 		return
@@ -257,8 +249,7 @@ def Type_specifier(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Type_specifier', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Type_specifier(parent)
 		return
@@ -290,8 +281,7 @@ def Params(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Params', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Params(parent)
 		return
@@ -326,8 +316,7 @@ def Param_list(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Param_list', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Param_list(parent)
 		return
@@ -356,8 +345,7 @@ def Param(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Param', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Param(parent)
 		return
@@ -386,8 +374,7 @@ def Param_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Param_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Param_prime(parent)
 		return
@@ -422,8 +409,7 @@ def Compound_stmt(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Compound_stmt', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Compound_stmt(parent)
 		return
@@ -447,8 +433,7 @@ def Statement_list(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Statement_list', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Statement_list(parent)
 		return
@@ -476,8 +461,7 @@ def Statement(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Statement', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Statement(parent)
 		return
@@ -521,8 +505,7 @@ def Expression_stmt(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Expression_stmt', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Expression_stmt(parent)
 		return
@@ -560,8 +543,7 @@ def Selection_stmt(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Selection_stmt', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Selection_stmt(parent)
 		return
@@ -594,8 +576,7 @@ def Else_stmt(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Else_stmt', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Else_stmt(parent)
 		return
@@ -629,8 +610,7 @@ def Iteration_stmt(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Iteration_stmt', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Iteration_stmt(parent)
 		return
@@ -666,8 +646,7 @@ def Return_stmt(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Return_stmt', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Return_stmt(parent)
 		return
@@ -696,8 +675,7 @@ def Return_stmt_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Return_stmt_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Return_stmt_prime(parent)
 		return
@@ -730,8 +708,7 @@ def Expression(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Expression', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Expression(parent)
 		return
@@ -764,8 +741,7 @@ def B(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at B', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		B(parent)
 		return
@@ -798,8 +774,7 @@ def H(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at H', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		H(parent)
 		return
@@ -827,8 +802,7 @@ def Simple_expression_zegond(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Simple_expression_zegond', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Simple_expression_zegond(parent)
 		return
@@ -857,8 +831,7 @@ def Simple_expression_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Simple_expression_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Simple_expression_prime(parent)
 		return
@@ -880,8 +853,7 @@ def C(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at C', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		C(parent)
 		return
@@ -909,8 +881,7 @@ def Relop(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Relop', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Relop(parent)
 		return
@@ -942,8 +913,7 @@ def Additive_expression(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Additive_expression', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Additive_expression(parent)
 		return
@@ -972,8 +942,7 @@ def Additive_expression_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Additive_expression_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Additive_expression_prime(parent)
 		return
@@ -995,8 +964,7 @@ def Additive_expression_zegond(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Additive_expression_zegond', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Additive_expression_zegond(parent)
 		return
@@ -1025,8 +993,7 @@ def D(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at D', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		D(parent)
 		return
@@ -1055,8 +1022,7 @@ def Addop(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Addop', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Addop(parent)
 		return
@@ -1088,8 +1054,7 @@ def Term(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Term', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Term(parent)
 		return
@@ -1118,8 +1083,7 @@ def Term_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Term_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Term_prime(parent)
 		return
@@ -1141,8 +1105,7 @@ def Term_zegond(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Term_zegond', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Term_zegond(parent)
 		return
@@ -1171,8 +1134,7 @@ def G(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at G', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		G(parent)
 		return
@@ -1201,8 +1163,7 @@ def Signed_factor(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Signed_factor', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Signed_factor(parent)
 		return
@@ -1240,8 +1201,7 @@ def Signed_factor_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Signed_factor_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Signed_factor_prime(parent)
 		return
@@ -1262,8 +1222,7 @@ def Signed_factor_zegond(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Signed_factor_zegond', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Signed_factor_zegond(parent)
 		return
@@ -1301,8 +1260,7 @@ def Factor(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Factor', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Factor(parent)
 		return
@@ -1341,8 +1299,7 @@ def Var_call_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Var_call_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Var_call_prime(parent)
 		return
@@ -1369,8 +1326,7 @@ def Var_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Var_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Var_prime(parent)
 		return
@@ -1399,8 +1355,7 @@ def Factor_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Factor_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Factor_prime(parent)
 		return
@@ -1429,8 +1384,7 @@ def Factor_zegond(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Factor_zegond', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Factor_zegond(parent)
 		return
@@ -1464,8 +1418,7 @@ def Args(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Args', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Args(parent)
 		return
@@ -1492,8 +1445,7 @@ def Arg_list(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Arg_list', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Arg_list(parent)
 		return
@@ -1522,8 +1474,7 @@ def Arg_list_prime(parent: anytree.Node) :
 		current_node.parent = None
 		print('Illegal character at Arg_list_prime', lookahead)
 		if lookahead == '$' :
-			print("Unexpected EOF")
-			exit()
+			raise SyntaxError("Unexpected EOF")
 		lookahead = get_next_token()
 		Arg_list_prime(parent)
 		return
