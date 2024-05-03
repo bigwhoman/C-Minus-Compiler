@@ -4,17 +4,20 @@ def dummy_function():
 	raise Exception("Please implement")
 get_next_token = dummy_function # override this first class function
 get_scanner_lookahead = dummy_function # override this first class function
+get_current_line = dummy_function # override this first class function
+parser_errors: list[str] = []
 
 def Match(expected_token : str, parent: anytree.Node) :
     global lookahead
     if lookahead == expected_token :
         anytree.Node(get_scanner_lookahead(), parent=parent)
         lookahead = get_next_token()
-    else :
-        print("Missing ", expected_token)
+    elif expected_token != "$" : # Tof sag. Must be like this to pass test 4
+        parser_errors.append(f"#{get_current_line()} : syntax error, missing {expected_token}")
 
 def S(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("S".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'int', 'void'] :
@@ -25,9 +28,10 @@ def S(parent: anytree.Node) :
 	if lookahead in ['ID', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at S', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		S(parent)
 		return
@@ -37,6 +41,7 @@ def S(parent: anytree.Node) :
 
 def Program(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Program".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'int', 'void'] :
@@ -46,9 +51,10 @@ def Program(parent: anytree.Node) :
 	if lookahead in ['ID', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Program', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Program(parent)
 		return
@@ -58,6 +64,7 @@ def Program(parent: anytree.Node) :
 
 def Declaration_list(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Declaration_list".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
@@ -69,9 +76,10 @@ def Declaration_list(parent: anytree.Node) :
 	if lookahead in ['[', ']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Declaration_list', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Declaration_list(parent)
 		return
@@ -86,21 +94,23 @@ def Declaration_list(parent: anytree.Node) :
 
 def Declaration(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Declaration".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Declaration', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Declaration")
 		return
 
 
 	if lookahead in ['[', ']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Declaration', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Declaration(parent)
 		return
@@ -115,14 +125,16 @@ def Declaration(parent: anytree.Node) :
 
 def Declaration_initial(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Declaration_initial".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', 'NUM', ']', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Declaration_initial', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Declaration_initial(parent)
 		return
@@ -131,7 +143,7 @@ def Declaration_initial(parent: anytree.Node) :
 	if lookahead in [';', '[', '(', ')', ','] :
 
 		current_node.parent = None
-		print('Missing character at Declaration_initial', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Declaration-initial")
 		return
 
 
@@ -144,12 +156,13 @@ def Declaration_initial(parent: anytree.Node) :
 
 def Declaration_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Declaration_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Declaration_prime', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Declaration-prime")
 		return
 
 
@@ -160,9 +173,10 @@ def Declaration_prime(parent: anytree.Node) :
 	if lookahead in [']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Declaration_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Declaration_prime(parent)
 		return
@@ -176,12 +190,13 @@ def Declaration_prime(parent: anytree.Node) :
 
 def Var_declaration_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Var_declaration_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Var_declaration_prime', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Var-declaration-prime")
 		return
 
 
@@ -199,9 +214,10 @@ def Var_declaration_prime(parent: anytree.Node) :
 	if lookahead in [']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Var_declaration_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Var_declaration_prime(parent)
 		return
@@ -211,21 +227,23 @@ def Var_declaration_prime(parent: anytree.Node) :
 
 def Fun_declaration_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Fun_declaration_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Fun_declaration_prime', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Fun-declaration-prime")
 		return
 
 
 	if lookahead in ['[', ']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Fun_declaration_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Fun_declaration_prime(parent)
 		return
@@ -242,14 +260,16 @@ def Fun_declaration_prime(parent: anytree.Node) :
 
 def Type_specifier(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Type_specifier".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Type_specifier', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Type_specifier(parent)
 		return
@@ -258,7 +278,7 @@ def Type_specifier(parent: anytree.Node) :
 	if lookahead in ['ID'] :
 
 		current_node.parent = None
-		print('Missing character at Type_specifier', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Type-specifier")
 		return
 
 
@@ -274,14 +294,16 @@ def Type_specifier(parent: anytree.Node) :
 
 def Params(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Params".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Params', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Params(parent)
 		return
@@ -290,7 +312,7 @@ def Params(parent: anytree.Node) :
 	if lookahead in [')'] :
 
 		current_node.parent = None
-		print('Missing character at Params', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Params")
 		return
 
 
@@ -309,14 +331,16 @@ def Params(parent: anytree.Node) :
 
 def Param_list(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Param_list".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Param_list', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Param_list(parent)
 		return
@@ -338,14 +362,16 @@ def Param_list(parent: anytree.Node) :
 
 def Param(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Param".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Param', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Param(parent)
 		return
@@ -354,7 +380,7 @@ def Param(parent: anytree.Node) :
 	if lookahead in [')', ','] :
 
 		current_node.parent = None
-		print('Missing character at Param', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Param")
 		return
 
 
@@ -367,14 +393,16 @@ def Param(parent: anytree.Node) :
 
 def Param_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Param_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Param_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Param_prime(parent)
 		return
@@ -395,21 +423,23 @@ def Param_prime(parent: anytree.Node) :
 
 def Compound_stmt(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Compound_stmt".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', 'NUM', '(', 'int', 'void', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Compound_stmt', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Compound-stmt")
 		return
 
 
 	if lookahead in ['[', ']', ')', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Compound_stmt', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Compound_stmt(parent)
 		return
@@ -426,14 +456,16 @@ def Compound_stmt(parent: anytree.Node) :
 
 def Statement_list(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Statement_list".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', 'endif', 'else', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Statement_list', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Statement_list(parent)
 		return
@@ -454,14 +486,16 @@ def Statement_list(parent: anytree.Node) :
 
 def Statement(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Statement".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Statement', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Statement(parent)
 		return
@@ -478,7 +512,7 @@ def Statement(parent: anytree.Node) :
 	if lookahead in ['}', 'endif', 'else'] :
 
 		current_node.parent = None
-		print('Missing character at Statement', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Statement")
 		return
 
 
@@ -498,14 +532,16 @@ def Statement(parent: anytree.Node) :
 
 def Expression_stmt(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Expression_stmt".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Expression_stmt', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Expression_stmt(parent)
 		return
@@ -523,7 +559,7 @@ def Expression_stmt(parent: anytree.Node) :
 	if lookahead in ['{', '}', 'if', 'endif', 'else', 'for', 'return'] :
 
 		current_node.parent = None
-		print('Missing character at Expression_stmt', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Expression-stmt")
 		return
 
 
@@ -536,14 +572,16 @@ def Expression_stmt(parent: anytree.Node) :
 
 def Selection_stmt(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Selection_stmt".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Selection_stmt', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Selection_stmt(parent)
 		return
@@ -552,7 +590,7 @@ def Selection_stmt(parent: anytree.Node) :
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'endif', 'else', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Selection_stmt', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Selection-stmt")
 		return
 
 
@@ -569,14 +607,16 @@ def Selection_stmt(parent: anytree.Node) :
 
 def Else_stmt(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Else_stmt".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Else_stmt', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Else_stmt(parent)
 		return
@@ -585,7 +625,7 @@ def Else_stmt(parent: anytree.Node) :
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'for', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Else_stmt', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Else-stmt")
 		return
 
 
@@ -603,14 +643,16 @@ def Else_stmt(parent: anytree.Node) :
 
 def Iteration_stmt(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Iteration_stmt".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Iteration_stmt', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Iteration_stmt(parent)
 		return
@@ -619,7 +661,7 @@ def Iteration_stmt(parent: anytree.Node) :
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else', 'return', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Iteration_stmt', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Iteration-stmt")
 		return
 
 
@@ -639,14 +681,16 @@ def Iteration_stmt(parent: anytree.Node) :
 
 def Return_stmt(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Return_stmt".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Return_stmt', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Return_stmt(parent)
 		return
@@ -655,7 +699,7 @@ def Return_stmt(parent: anytree.Node) :
 	if lookahead in ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else', 'for', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Return_stmt', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Return-stmt")
 		return
 
 
@@ -668,14 +712,16 @@ def Return_stmt(parent: anytree.Node) :
 
 def Return_stmt_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Return_stmt_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', ']', ')', 'int', 'void', ',', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Return_stmt_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Return_stmt_prime(parent)
 		return
@@ -693,7 +739,7 @@ def Return_stmt_prime(parent: anytree.Node) :
 	if lookahead in ['{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
 		current_node.parent = None
-		print('Missing character at Return_stmt_prime', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Return-stmt-prime")
 		return
 
 
@@ -701,14 +747,16 @@ def Return_stmt_prime(parent: anytree.Node) :
 
 def Expression(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Expression".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Expression', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Expression(parent)
 		return
@@ -722,7 +770,7 @@ def Expression(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ','] :
 
 		current_node.parent = None
-		print('Missing character at Expression', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Expression")
 		return
 
 
@@ -734,14 +782,16 @@ def Expression(parent: anytree.Node) :
 
 def B(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("B".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
 		current_node.parent = None
-		print('Illegal character at B', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		B(parent)
 		return
@@ -767,14 +817,16 @@ def B(parent: anytree.Node) :
 
 def H(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("H".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return'] :
 
 		current_node.parent = None
-		print('Illegal character at H', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		H(parent)
 		return
@@ -795,14 +847,16 @@ def H(parent: anytree.Node) :
 
 def Simple_expression_zegond(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Simple_expression_zegond".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Simple_expression_zegond', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Simple_expression_zegond(parent)
 		return
@@ -811,7 +865,7 @@ def Simple_expression_zegond(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ','] :
 
 		current_node.parent = None
-		print('Missing character at Simple_expression_zegond', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Simple-expression-zegond")
 		return
 
 
@@ -824,14 +878,16 @@ def Simple_expression_zegond(parent: anytree.Node) :
 
 def Simple_expression_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Simple_expression_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Simple_expression_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Simple_expression_prime(parent)
 		return
@@ -846,14 +902,16 @@ def Simple_expression_prime(parent: anytree.Node) :
 
 def C(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("C".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at C', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		C(parent)
 		return
@@ -874,14 +932,16 @@ def C(parent: anytree.Node) :
 
 def Relop(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Relop".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', ';', '[', ']', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Relop', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Relop(parent)
 		return
@@ -890,7 +950,7 @@ def Relop(parent: anytree.Node) :
 	if lookahead in ['ID', 'NUM', '(', '+', '-'] :
 
 		current_node.parent = None
-		print('Missing character at Relop', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Relop")
 		return
 
 
@@ -906,14 +966,16 @@ def Relop(parent: anytree.Node) :
 
 def Additive_expression(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Additive_expression".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Additive_expression', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Additive_expression(parent)
 		return
@@ -927,7 +989,7 @@ def Additive_expression(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ','] :
 
 		current_node.parent = None
-		print('Missing character at Additive_expression', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Additive-expression")
 		return
 
 
@@ -935,14 +997,16 @@ def Additive_expression(parent: anytree.Node) :
 
 def Additive_expression_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Additive_expression_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Additive_expression_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Additive_expression_prime(parent)
 		return
@@ -957,14 +1021,16 @@ def Additive_expression_prime(parent: anytree.Node) :
 
 def Additive_expression_zegond(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Additive_expression_zegond".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Additive_expression_zegond', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Additive_expression_zegond(parent)
 		return
@@ -973,7 +1039,7 @@ def Additive_expression_zegond(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '=='] :
 
 		current_node.parent = None
-		print('Missing character at Additive_expression_zegond', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Additive-expression-zegond")
 		return
 
 
@@ -986,14 +1052,16 @@ def Additive_expression_zegond(parent: anytree.Node) :
 
 def D(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("D".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at D', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		D(parent)
 		return
@@ -1015,14 +1083,16 @@ def D(parent: anytree.Node) :
 
 def Addop(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Addop".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', ';', '[', ']', ')', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Addop', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Addop(parent)
 		return
@@ -1031,7 +1101,7 @@ def Addop(parent: anytree.Node) :
 	if lookahead in ['ID', 'NUM', '('] :
 
 		current_node.parent = None
-		print('Missing character at Addop', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Addop")
 		return
 
 
@@ -1047,14 +1117,16 @@ def Addop(parent: anytree.Node) :
 
 def Term(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Term".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Term', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Term(parent)
 		return
@@ -1068,7 +1140,7 @@ def Term(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '=='] :
 
 		current_node.parent = None
-		print('Missing character at Term', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Term")
 		return
 
 
@@ -1076,14 +1148,16 @@ def Term(parent: anytree.Node) :
 
 def Term_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Term_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Term_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Term_prime(parent)
 		return
@@ -1098,14 +1172,16 @@ def Term_prime(parent: anytree.Node) :
 
 def Term_zegond(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Term_zegond".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Term_zegond', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Term_zegond(parent)
 		return
@@ -1114,7 +1190,7 @@ def Term_zegond(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '=='] :
 
 		current_node.parent = None
-		print('Missing character at Term_zegond', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Term-zegond")
 		return
 
 
@@ -1127,14 +1203,16 @@ def Term_zegond(parent: anytree.Node) :
 
 def G(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("G".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at G', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		G(parent)
 		return
@@ -1156,14 +1234,16 @@ def G(parent: anytree.Node) :
 
 def Signed_factor(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Signed_factor".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Signed_factor', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Signed_factor(parent)
 		return
@@ -1176,7 +1256,7 @@ def Signed_factor(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Missing character at Signed_factor', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Signed-factor")
 		return
 
 
@@ -1194,14 +1274,16 @@ def Signed_factor(parent: anytree.Node) :
 
 def Signed_factor_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Signed_factor_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Signed_factor_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Signed_factor_prime(parent)
 		return
@@ -1215,14 +1297,16 @@ def Signed_factor_prime(parent: anytree.Node) :
 
 def Signed_factor_zegond(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Signed_factor_zegond".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Signed_factor_zegond', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Signed_factor_zegond(parent)
 		return
@@ -1231,7 +1315,7 @@ def Signed_factor_zegond(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Missing character at Signed_factor_zegond', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Signed-factor-zegond")
 		return
 
 
@@ -1253,14 +1337,16 @@ def Signed_factor_zegond(parent: anytree.Node) :
 
 def Factor(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Factor".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Factor', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Factor(parent)
 		return
@@ -1274,7 +1360,7 @@ def Factor(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Missing character at Factor', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Factor")
 		return
 
 
@@ -1292,14 +1378,16 @@ def Factor(parent: anytree.Node) :
 
 def Var_call_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Var_call_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Var_call_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Var_call_prime(parent)
 		return
@@ -1319,14 +1407,16 @@ def Var_call_prime(parent: anytree.Node) :
 
 def Var_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Var_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Var_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Var_prime(parent)
 		return
@@ -1348,14 +1438,16 @@ def Var_prime(parent: anytree.Node) :
 
 def Factor_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Factor_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'NUM', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Factor_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Factor_prime(parent)
 		return
@@ -1377,14 +1469,16 @@ def Factor_prime(parent: anytree.Node) :
 
 def Factor_zegond(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Factor_zegond".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', '[', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '='] :
 
 		current_node.parent = None
-		print('Illegal character at Factor_zegond', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Factor_zegond(parent)
 		return
@@ -1393,7 +1487,7 @@ def Factor_zegond(parent: anytree.Node) :
 	if lookahead in [';', ']', ')', ',', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Missing character at Factor_zegond', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Factor-zegond")
 		return
 
 
@@ -1411,14 +1505,16 @@ def Factor_zegond(parent: anytree.Node) :
 
 def Args(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Args".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', ';', '[', ']', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Args', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Args(parent)
 		return
@@ -1438,14 +1534,16 @@ def Args(parent: anytree.Node) :
 
 def Arg_list(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Arg_list".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', ';', '[', ']', 'int', 'void', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Arg_list', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Arg_list(parent)
 		return
@@ -1459,7 +1557,7 @@ def Arg_list(parent: anytree.Node) :
 	if lookahead in [')'] :
 
 		current_node.parent = None
-		print('Missing character at Arg_list', lookahead)
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, missing Arg-list")
 		return
 
 
@@ -1467,14 +1565,16 @@ def Arg_list(parent: anytree.Node) :
 
 def Arg_list_prime(parent: anytree.Node) :
 	global lookahead
+	global parser_errors
 	current_node = anytree.Node("Arg_list_prime".replace("_", "-"), parent=parent)
     
 	if lookahead in ['$', 'ID', ';', '[', 'NUM', ']', '(', 'int', 'void', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
 
 		current_node.parent = None
-		print('Illegal character at Arg_list_prime', lookahead)
 		if lookahead == '$' :
+			parser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 			raise SyntaxError("Unexpected EOF")
+		parser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 		lookahead = get_next_token()
 		Arg_list_prime(parent)
 		return

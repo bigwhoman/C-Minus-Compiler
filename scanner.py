@@ -35,6 +35,9 @@ class Scanner():
         self.pointer_end = 0
         self.file = open(input)
 
+    def get_current_line_number(self) -> int:
+        return self.line_number
+
     def get_current_scanner_lookahead_str(self) -> str:
         if self.lookahead_token == None:
             return "$"

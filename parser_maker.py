@@ -74,6 +74,7 @@ ffff.write(df.to_string())
 func_template = """
 def {func}(parent: anytree.Node) :
 \tglobal lookahead
+\tglobal parser_errors
 \tcurrent_node = anytree.Node("{func}".replace("_", "-"), parent=parent)
     {func_body}
     
@@ -88,6 +89,8 @@ def dummy_function():
 \traise Exception("Please implement")
 get_next_token = dummy_function # override this first class function
 get_scanner_lookahead = dummy_function # override this first class function
+get_current_line = dummy_function # override this first class function
+parser_errors: list[str] = []
 """
 match_function = """
 def Match(expected_token : str, parent: anytree.Node) :
@@ -95,8 +98,8 @@ def Match(expected_token : str, parent: anytree.Node) :
     if lookahead == expected_token :
         anytree.Node(get_scanner_lookahead(), parent=parent)
         lookahead = get_next_token()
-    else :
-        print("Missing ", expected_token)
+    elif expected_token != "$" : # Tof sag. Must be like this to pass test 4
+        parser_errors.append(f"#{get_current_line()} : syntax error, missing {expected_token}")
 """
 all_code += match_function
 
@@ -122,9 +125,10 @@ for index, row in df.iterrows():
         if key.strip() == '' :
             temporal_body = f"""
 \t\tcurrent_node.parent = None
-\t\tprint('Illegal character at {row["Nonterminal"]}', lookahead)
 \t\tif lookahead == '$' :
+\t\t\tparser_errors.append("#" + str(get_current_line() + 1) + " : syntax error, Unexpected EOF")
 \t\t\traise SyntaxError("Unexpected EOF")
+\t\tparser_errors.append("#" + str(get_current_line()) + " : syntax error, illegal " + lookahead)
 \t\tlookahead = get_next_token()
 \t\t{row["Nonterminal"]}(parent)
 \t\treturn
@@ -132,7 +136,7 @@ for index, row in df.iterrows():
         elif key.strip() == 'Synch' :
             temporal_body = f"""
 \t\tcurrent_node.parent = None
-\t\tprint('Missing character at {row["Nonterminal"]}', lookahead)
+\t\tparser_errors.append("#" + str(get_current_line()) + " : syntax error, missing {row["Nonterminal"].replace("_", "-")}")
 \t\treturn
 """           
         elif key.strip() == 'EPSILON' :
