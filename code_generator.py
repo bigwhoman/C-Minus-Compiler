@@ -1,8 +1,8 @@
 from typing import Union
 import scanner
-from enum import Enum
+from enum import Enum, IntEnum
 
-class Constants(Enum):
+class Constants(IntEnum):
     INT_TYPE = 1
     VOID_TYPE = 2
 
@@ -86,16 +86,16 @@ class ThreeAddressInstruction:
 class SemanticAnalyzer:
     def __init__(self):
         # A stack which each entry contains a list of variables in a scope
-        self.scope_stack: list[list[SymbolTableEntry]] = []
+        self.scope_stack: list[list[SymbolTableEntry]] = [[]]
         self.error_list: list[str] = []
 
     def enter_scope(self):
-        self.scope_stack.append({})
+        self.scope_stack.append([])
     
     def exit_scope(self):
         self.scope_stack.pop()
 
-    def declared_before(self, lexeme: str) -> Union[SymbolTableEntry, None]:
+    def get_entry(self, lexeme: str) -> Union[SymbolTableEntry, None]:
         """
         Checks if a lexeme has been defined before and returns it if it has
         """
@@ -109,21 +109,21 @@ class SemanticAnalyzer:
         """
         Declare a new int variable in the current scope
         """
-        assert not self.declared_before(name)
+        assert not self.get_entry(name)
         self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT, None))
     
     def declare_array(self, name: str, size: int):
         """
         Declare a new int array in the current scope
         """
-        assert not self.declared_before(name)
+        assert not self.get_entry(name)
         self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT_ARRAY, size))
 
     def declare_function(self, name: str, return_type: Constants, start_address: int):
         """
         Declare a new int array in the current scope
         """
-        assert not self.declared_before(name)
+        assert not self.get_entry(name)
         # Convert type on stack to function type
         if return_type == Constants.INT_TYPE:
             function_type = VariableType.INT_FUNCTION
@@ -184,7 +184,7 @@ class CodeGenerator:
             self.semantic_analyzer.declare_variable(self.declaring_pid_value)
             if len(self.semantic_analyzer.scope_stack) == 1: # is this a global variable?
                 # The addressing is absolute. Assign the address to it
-                self.semantic_analyzer.scope_stack[0][self.declaring_pid_value].address = self.FIRST_GLOBAL_VARIABLE_ADDRESS + self.declared_global_variables * 4
+                self.semantic_analyzer.get_entry(self.declaring_pid_value).address = self.FIRST_GLOBAL_VARIABLE_ADDRESS + self.declared_global_variables * 4
                 self.declared_global_variables += 1
         elif self.ss[-1] == int(Constants.VOID_TYPE):
             self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Illegal type of void for '{self.declaring_pid_value}'")
@@ -220,10 +220,11 @@ class CodeGenerator:
         This language is simple and we only declare scopes in functions
         """
         assert self.declaring_pid_value != None
-        assert self.declaring_function_params != None
+        assert self.declaring_function_params == None
         return_type = self.ss.pop()
         assert return_type in [int(Constants.INT_TYPE), int(Constants.VOID_TYPE)]
-        self.semantic_analyzer.declare_function(self.declaring_pid_value, return_type)
+        self.semantic_analyzer.declare_function(self.declaring_pid_value, return_type, self.pc)
+        self.declaring_pid_value = None
         self.declaring_function_params = [] # create a fresh list of parameters
         self.semantic_analyzer.enter_scope()
 
