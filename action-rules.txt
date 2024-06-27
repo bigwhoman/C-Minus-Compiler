@@ -10,13 +10,13 @@ Var-declaration-prime -> [ #array_size NUM ] ; #array_declared
 Fun-declaration-prime -> #function_start ( Params ) #function_params_end Compound-stmt #function_end
 Type-specifier -> int #int_type
 Type-specifier -> void #void_type
-Params -> int #declaring_pid ID Param-prime Param-list
+Params -> int #int_type #declaring_pid ID Param-prime Param-list
 Params -> void
 Param-list -> , Param Param-list
 Param-list -> ''
 Param -> Declaration-initial Param-prime
-Param-prime -> [ ] #array_param
-Param-prime -> '' #scalar_param
+Param-prime -> [ ] #array_param #pop_int_type
+Param-prime -> '' #scalar_param #pop_int_type
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list
 Statement-list -> ''

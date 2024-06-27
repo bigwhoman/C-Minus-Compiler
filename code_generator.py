@@ -86,7 +86,7 @@ class ThreeAddressInstruction:
 class SemanticAnalyzer:
     def __init__(self):
         # A stack which each entry contains a list of variables in a scope
-        self.scope_stack: list[dict[str, SymbolTableEntry]] = []
+        self.scope_stack: list[list[SymbolTableEntry]] = []
         self.error_list: list[str] = []
 
     def enter_scope(self):
@@ -95,32 +95,56 @@ class SemanticAnalyzer:
     def exit_scope(self):
         self.scope_stack.pop()
 
+    def declared_before(self, lexeme: str) -> Union[SymbolTableEntry, None]:
+        """
+        Checks if a lexeme has been defined before and returns it if it has
+        """
+        for scope in self.scope_stack:
+            for entry in scope:
+                if lexeme == entry.lexeme:
+                    return entry
+        return None
+
     def declare_variable(self, name: str):
         """
         Declare a new int variable in the current scope
         """
-        assert name not in self.scope_stack[-1]
-        self.scope_stack[-1][name] = SymbolTableEntry(name, VariableType.INT, None)
+        assert not self.declared_before(name)
+        self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT, None))
     
     def declare_array(self, name: str, size: int):
         """
         Declare a new int array in the current scope
         """
-        assert name not in self.scope_stack[-1]
-        self.scope_stack[-1][name] = SymbolTableEntry(name, VariableType.INT_ARRAY, size)
+        assert not self.declared_before(name)
+        self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT_ARRAY, size))
 
-    def declare_function(self, name: str, return_type: Constants):
+    def declare_function(self, name: str, return_type: Constants, start_address: int):
         """
         Declare a new int array in the current scope
         """
-        assert name not in self.scope_stack[-1]
+        assert not self.declared_before(name)
+        # Convert type on stack to function type
         if return_type == Constants.INT_TYPE:
             function_type = VariableType.INT_FUNCTION
         elif return_type == Constants.VOID_TYPE:
             function_type = VariableType.VOID_FUNCTION
         else:
             raise Exception("RIDEMAN BOZORG")
-        self.scope_stack[-1][name] = SymbolTableEntry(name, function_type, [])
+        # Create entry
+        entry = SymbolTableEntry(name, function_type, [])
+        entry.address = start_address
+        self.scope_stack[-1].append(entry)
+
+    def declare_old_function_arguments(self, arguments: list[VariableType]):
+        """
+        After the arguments of a function has been parsed, this method is called to fix them
+        in the scope stack for semantic analyzer
+        """
+        # Check if everything is correct and we are actually modifying a function
+        assert self.scope_stack[-2][-1].var_type in [VariableType.INT_FUNCTION, VariableType.VOID_FUNCTION]
+        # Set the params
+        self.scope_stack[-2][-1].parameters = arguments
     
 
 class CodeGenerator:
@@ -140,7 +164,7 @@ class CodeGenerator:
         # Name of the variable we are declaring
         self.declaring_pid_value: Union[None, str] = None
         # List of parameters of function we are declaring
-        self.declaring_function_params: Union[None, list[list[VariableType]]] = None
+        self.declaring_function_params: Union[None, list[VariableType]] = None
 
     def int_type(self):
         self.ss.append(int(Constants.INT_TYPE))
@@ -196,13 +220,12 @@ class CodeGenerator:
         This language is simple and we only declare scopes in functions
         """
         assert self.declaring_pid_value != None
+        assert self.declaring_function_params != None
         return_type = self.ss.pop()
         assert return_type in [int(Constants.INT_TYPE), int(Constants.VOID_TYPE)]
         self.semantic_analyzer.declare_function(self.declaring_pid_value, return_type)
+        self.declaring_function_params = [] # create a fresh list of parameters
         self.semantic_analyzer.enter_scope()
-
-    def function_end(self):
-        self.semantic_analyzer.exit_scope()
 
     def scalar_param(self):
         """
@@ -210,7 +233,9 @@ class CodeGenerator:
         Everything is pass by reference
         """
         assert self.declaring_pid_value != None
+        assert self.declaring_function_params != None
         self.semantic_analyzer.declare_variable(self.declaring_pid_value)
+        self.declaring_function_params.append(VariableType.INT)
         self.declaring_pid_value = None
 
     def array_param(self):
@@ -218,5 +243,21 @@ class CodeGenerator:
         If we see an array parameter, just declare it as a pointer to array.
         """
         assert self.declaring_pid_value != None
-        self.semantic_analyzer.declare_array(self.declaring_pid_value, -1) # -1 is N/A
+        assert self.declaring_function_params != None
+        self.semantic_analyzer.declare_array(self.declaring_pid_value, 0) # 0 is N/A
+        self.declaring_function_params.append(VariableType.INT_ARRAY)
         self.declaring_pid_value = None
+
+    def function_params_end(self):
+        """
+        When the parameters end, we save the function in the symbol table
+        """
+        assert self.declaring_function_params != None
+        self.semantic_analyzer.declare_old_function_arguments(self.declaring_function_params)
+        self.declaring_function_params = None # reset everything
+    
+    def function_end(self):
+        self.semantic_analyzer.exit_scope()
+
+    def pop_int_type(self):
+        assert self.ss.pop() == int(Constants.INT_TYPE)

@@ -1,4 +1,6 @@
 import anytree
+from code_generator import CodeGenerator
+
 lookahead = ""
 def dummy_function():
 	raise Exception("Please implement")
@@ -6,6 +8,7 @@ get_next_token = dummy_function # override this first class function
 get_scanner_lookahead = dummy_function # override this first class function
 get_current_line = dummy_function # override this first class function
 parser_errors: list[str] = []
+code_generator: CodeGenerator = None
 
 def Match(expected_token : str, parent: anytree.Node) :
     global lookahead
@@ -149,6 +152,7 @@ def Declaration_initial(parent: anytree.Node) :
 
 	if lookahead in ['int', 'void'] :
 		Type_specifier(current_node)
+		code_generator.declaring_pid()
 		Match('ID', current_node)
 		return
 
@@ -202,13 +206,16 @@ def Var_declaration_prime(parent: anytree.Node) :
 
 	if lookahead in [';'] :
 		Match(';', current_node)
+		code_generator.variable_declared()
 		return
 
 	if lookahead in ['['] :
 		Match('[', current_node)
+		code_generator.array_size()
 		Match('NUM', current_node)
 		Match(']', current_node)
 		Match(';', current_node)
+		code_generator.array_declared()
 		return
 
 	if lookahead in [']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
@@ -250,10 +257,13 @@ def Fun_declaration_prime(parent: anytree.Node) :
 
 
 	if lookahead in ['('] :
+		code_generator.function_start()
 		Match('(', current_node)
 		Params(current_node)
 		Match(')', current_node)
+		code_generator.function_params_end()
 		Compound_stmt(current_node)
+		code_generator.function_end()
 		return
 
     
@@ -284,10 +294,12 @@ def Type_specifier(parent: anytree.Node) :
 
 	if lookahead in ['int'] :
 		Match('int', current_node)
+		code_generator.int_type()
 		return
 
 	if lookahead in ['void'] :
 		Match('void', current_node)
+		code_generator.void_type()
 		return
 
     
@@ -318,6 +330,8 @@ def Params(parent: anytree.Node) :
 
 	if lookahead in ['int'] :
 		Match('int', current_node)
+		code_generator.int_type()
+		code_generator.declaring_pid()
 		Match('ID', current_node)
 		Param_prime(current_node)
 		Param_list(current_node)
@@ -411,10 +425,13 @@ def Param_prime(parent: anytree.Node) :
 	if lookahead in ['['] :
 		Match('[', current_node)
 		Match(']', current_node)
+		code_generator.array_param()
+		code_generator.pop_int_type()
 		return
 
 	if lookahead in [')', ','] :
-
+		code_generator.scalar_param()
+		code_generator.pop_int_type()
 		anytree.Node("epsilon", parent=current_node)
 		return
 
