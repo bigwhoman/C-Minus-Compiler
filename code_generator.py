@@ -30,6 +30,12 @@ class SymbolTableEntry:
         # Otherwise it is the offset of this variable from top of the stack.
         self.address = 0
 
+    def __repr__(self) -> str:
+        return str(self)
+
+    def __str__(self) -> str:
+        return f"({self.lexeme}, {self.var_type}, {self.parameters}, {self.address})"
+
 class ThreeAddressInstructionNumberType(Enum):
     DIRECT_ADDRESS = 1
     IMMEDIATE = 2
@@ -50,6 +56,9 @@ class ThreeAddressInstructionOperand:
             return "#" + str(self.value)
         elif self.number_type == ThreeAddressInstructionNumberType.INDIRECT_ADDRESS:
             return "@" + str(self.value)
+    
+    def __repr__(self) -> str:
+        return str(self)
 
 class ThreeAddressInstructionOpcode(Enum):
     ADD = 1
@@ -258,6 +267,9 @@ class CodeGenerator:
         self.declaring_function_params = None # reset everything
     
     def function_end(self):
+        """
+        When the function ends, we pop the scope
+        """
         self.semantic_analyzer.exit_scope()
 
     def pop_int_type(self):
