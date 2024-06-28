@@ -5,14 +5,4 @@ void myfunction(void) {
 
 }
 
-int myfunction1(int n, int m[]) {
 
-}
-
-void main(void) {
-    int c;
-
-    a = 1;
-    b = 2;
-    c = 3;
-}
