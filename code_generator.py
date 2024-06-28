@@ -310,28 +310,30 @@ class CodeGenerator:
 
         # Save the last pc for later use
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
         self.sp.pointer -= 4
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        
 
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                                                                                ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         # Add memory to stack 
         self.sp.pointer -= 100
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(100, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        return_sp = self.sp.pointer
-        return_pc = self.program_block.get_pc() + 1
 
-        
+
+
+                
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(return_sp, ThreeAddressInstructionNumberType.IMMEDIATE),
-                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+                                                                        [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         self.sp.pointer += 4  
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
@@ -339,9 +341,9 @@ class CodeGenerator:
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] )) 
               
         # TODO : Needs to be completed      
-        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(return_pc, ThreeAddressInstructionNumberType.IMMEDIATE),
-                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+        #                                                                 [ThreeAddressInstructionOperand(return_pc, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #                                                                     ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
         
         # Skip a block for return value
         self.sp.pointer += 8  
@@ -397,7 +399,7 @@ class CodeGenerator:
         # Put the return value in EAX register
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                                                                            ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+                                                                            ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         self.sp.pointer -= 8
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
@@ -416,13 +418,13 @@ class CodeGenerator:
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        
+
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                                                                                ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+                                                                                ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         print(self.sp.pointer)
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
-                                                                        [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)])) 
+                                                                        [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)])) 
 
     def pop_int_type(self):
         assert self.ss.pop() == int(Constants.INT_TYPE)
