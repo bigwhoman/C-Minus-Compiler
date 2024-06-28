@@ -333,6 +333,7 @@ def Params(parent: anytree.Node) :
 		code_generator.int_type()
 		code_generator.declaring_pid()
 		Match('ID', current_node)
+		code_generator.push_param()
 		Param_prime(current_node)
 		Param_list(current_node)
 		return
@@ -368,6 +369,7 @@ def Param_list(parent: anytree.Node) :
 
 	if lookahead in [','] :
 		Match(',', current_node)
+		code_generator.push_param()
 		Param(current_node)
 		Param_list(current_node)
 		return
@@ -1494,10 +1496,10 @@ def Factor_prime(parent: anytree.Node) :
 
 
 	if lookahead in ['('] :
-		code_generator.call()
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
+		code_generator.call()
 		return
 
     
@@ -1587,6 +1589,7 @@ def Arg_list(parent: anytree.Node) :
 
 	if lookahead in ['ID', 'NUM', '(', '+', '-'] :
 		Expression(current_node)
+		code_generator.push_arg()
 		Arg_list_prime(current_node)
 		return
 
@@ -1625,6 +1628,7 @@ def Arg_list_prime(parent: anytree.Node) :
 	if lookahead in [','] :
 		Match(',', current_node)
 		Expression(current_node)
+		code_generator.push_arg()
 		Arg_list_prime(current_node)
 		return
 

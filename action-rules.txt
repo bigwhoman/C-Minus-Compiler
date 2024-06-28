@@ -10,9 +10,9 @@ Var-declaration-prime -> [ #array_size NUM ] ; #array_declared
 Fun-declaration-prime -> #function_start ( Params ) #function_params_end Compound-stmt #function_end
 Type-specifier -> int #int_type
 Type-specifier -> void #void_type
-Params -> int #int_type #declaring_pid ID Param-prime Param-list
+Params -> int #int_type #declaring_pid ID #push_param Param-prime Param-list
 Params -> void
-Param-list -> , Param Param-list
+Param-list -> , #push_param Param  Param-list
 Param-list -> ''
 Param -> Declaration-initial Param-prime
 Param-prime -> [ ] #array_param #pop_int_type
@@ -56,8 +56,8 @@ Signed-factor-zegond -> + Factor | - Factor #negate | Factor-zegond
 Factor -> ( Expression ) | #pid ID Var-call-prime | #immediate NUM
 Var-call-prime -> ( Args ) | Var-prime
 Var-prime -> [ Expression ] #array | ''
-Factor-prime ->  #call ( Args ) | ''
+Factor-prime ->    ( Args ) #call | ''
 Factor-zegond -> ( Expression ) | #immediate NUM
 Args -> Arg-list | ''
-Arg-list -> Expression Arg-list-prime
-Arg-list-prime -> , Expression Arg-list-prime | ''
+Arg-list -> Expression #push_arg Arg-list-prime
+Arg-list-prime -> , Expression #push_arg Arg-list-prime | ''

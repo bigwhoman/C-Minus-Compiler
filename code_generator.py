@@ -224,7 +224,10 @@ class ProgramBlock:
         # Create a file for program blocks
         self.program = open("./PB.txt","w")
 
-    def add_instruction(self,ThreeAddressInstruction, i=None):
+    def add_instruction(self,ThreeAddressInstruction, i=None, empty=None):
+        if empty != None :
+            self.pc += 1
+            return 
         print(self.pc, ThreeAddressInstruction)
         # Add instruction to program block 
         if i == None :
@@ -238,7 +241,7 @@ class ProgramBlock:
         return self.pc
 
 class StackPointer():
-    TOP_STACK_ADDRESS = 2000
+    TOP_STACK_ADDRESS = 100000
     STACK_POINTER_ADDRESS = 100
     def __init__(self):
         self.pointer = self.TOP_STACK_ADDRESS
@@ -255,6 +258,14 @@ class RAX():
     RAX_ADDRESS = 108
     def __init__(self):
         self.address = self.RAX_ADDRESS
+
+class ARG_MEM():
+    "A place to store arguments"
+    ADDR = 2000
+    def __init__(self):
+        self.address = self.ADDR
+    def reset(self) : 
+        self.address = self.ADDR
 class TempRegisters():
     """
     Temp registers required for variable address calculations
@@ -279,7 +290,11 @@ class CodeGenerator:
         self.ss: list[int] = [12, 22]  # Semantic stack
         self.scanner = scanner
         self.semantic_analyzer = SemanticAnalyzer()
+        self.param_leftover = []
         self.program_block = ProgramBlock()
+        self.func_params = 0
+        self.arg_mem = ARG_MEM()
+        self.arg_num = 0
         # We always define stack pointer the first global variable
         self.declared_global_variables = 10
         # Name of the variable we are declaring
@@ -420,6 +435,8 @@ class CodeGenerator:
         # We first save the return address and the return program block
         # TODO : When get temp is completed do this 
         print("Start Func ----------------")
+        self.func_params = 0
+        self.param_leftover = []
         # Sp points to the pc 
         self.sp.pointer -= 8
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
@@ -472,6 +489,7 @@ class CodeGenerator:
                                                                             ThreeAddressInstructionOperand(8, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         
+        
         print("Shoomb Start +++++++++++++++++++++++++++")
         # Now the stack pointer is pointing at the first local variable
     
@@ -490,16 +508,42 @@ class CodeGenerator:
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-    
+    def push_param(self) :
+        self.func_params += 1
+
     def call(self):
         print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        self.arg_mem.reset()
+        fixed_args = []
+        print(self.ss)
+        
+        for i in range(self.arg_num) :
+            fixed_args.append(self.ss.pop())
+            # print("sag ", self.pid_scope_stack.pop())
+        print(self.ss)
+        print(self.pid_scope_stack)
+        for i in range(self.arg_num) : 
+            self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(fixed_args[len(fixed_args) - 1 - i], ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(self.arg_mem.address + 4 * i, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))            
+        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+        #                                                             [ThreeAddressInstructionOperand(self.program_block.get_pc() + 2, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #                                                                 ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))            
+
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 2, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                             ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
-                                                                        [ThreeAddressInstructionOperand(self.semantic_analyzer.get_entry(), ThreeAddressInstructionNumberType.IMMEDIATE)]  ))        
+                                                                        [ThreeAddressInstructionOperand(self.ss.pop(), ThreeAddressInstructionNumberType.IMMEDIATE)]  ))        
+        # print("sag2",self.pid_scope_stack.pop())
+        self.arg_num = 0
         print("Shoomb Call aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+    def push_arg(self):
+        self.arg_num += 1
+        
+
     def scalar_param(self):
         """
         If we see an scalar parameter, just declare it as a variable.
@@ -525,10 +569,23 @@ class CodeGenerator:
         """
         When the parameters end, we save the function in the symbol table
         """
+        print("Func par end 4444444444444444444444444444")
         assert self.declaring_function_params != None
         self.semantic_analyzer.declare_old_function_arguments(self.declaring_function_params)
         self.declaring_function_params = None # reset everything
-    
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))  
+        for i in range(self.func_params) :
+            self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(self.arg_mem.address + 4 * i, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+                        
+            self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
+                                                                        [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE), 
+                                                                              ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]    ))   
+        print("Shoomb param end")
     def function_end(self):
         """
         When the function ends, we pop the scope and remove the
@@ -623,6 +680,7 @@ class CodeGenerator:
         else:
             self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
         self.ss.append(variable.address)
+        print(variable.lexeme, variable.address)
 
     def save_operator(self):
         """
