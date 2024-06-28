@@ -747,6 +747,7 @@ def Return_stmt_prime(parent: anytree.Node) :
 
 	if lookahead in ['ID', 'NUM', '(', '+', '-'] :
 		Expression(current_node)
+		code_generator.return_func()
 		Match(';', current_node)
 		return
 
@@ -1493,6 +1494,7 @@ def Factor_prime(parent: anytree.Node) :
 
 
 	if lookahead in ['('] :
+		code_generator.call()
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
