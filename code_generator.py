@@ -232,7 +232,7 @@ class CodeGenerator:
             self.program_block.add_instruction(
                                 ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                             [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
-                                                                ThreeAddressInstructionOperand(self.eax.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
+                                                                ThreeAddressInstructionOperand(self.rax.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
 
     def int_type(self):
         self.ss.append(int(Constants.INT_TYPE))
