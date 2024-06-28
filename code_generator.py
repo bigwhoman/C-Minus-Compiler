@@ -626,16 +626,35 @@ class CodeGenerator:
                         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ]))
-        print("DONE")
-    
-    def array(self):
-        pass
+
+    def immediate(self):
+        """
+        Generates code to put an immediate value in the stack in a temporary.
+        I will also get the temporary and push the address in the ss.
+        """
+        print("IMMEDIATE")
+        assert self.scanner.lookahead_token[0] == scanner.TokenType.NUM
+        # Create a variable
+        tmp_address = self.semantic_analyzer.get_temp()
+        # Put the address in R1
+        self.find_absolute_address(tmp_address, VariableScope.LOCAL_VARIABLE, self.temp_registers.TEMP_R1)
+        # Create the code
+        # [R1] = #Number
+        self.program_block.add_instruction(ThreeAddressInstruction(
+                    ThreeAddressInstructionOpcode.ASSIGN,
+                    [
+                        ThreeAddressInstructionOperand(int(self.scanner.lookahead_token[1]), ThreeAddressInstructionNumberType.IMMEDIATE),
+                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ]))
+        # Put data in the stack
+        self.ss.append(tmp_address)
+        self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
 
     def calculate(self):
         pass
 
-    def immediate(self):
+    def negate(self):
         pass
 
-    def negate(self):
+    def array(self):
         pass
