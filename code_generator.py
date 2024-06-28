@@ -193,6 +193,7 @@ class SemanticAnalyzer:
             tmp_address = self.scope_stack[-1][-1].address + 4
         self.scope_stack[-1].append(SymbolTableEntry("_temp_var", VariableType.INT, None))
         self.scope_stack[-1][-1].address = tmp_address
+        return tmp_address
 
 
 class ProgramBlock:
