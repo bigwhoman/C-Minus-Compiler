@@ -25,7 +25,7 @@ Statement -> Compound-stmt
 Statement -> Selection-stmt 
 Statement -> Iteration-stmt 
 Statement -> Return-stmt
-Expression-stmt -> Expression ; #pop_1 -> pop one to remove the statement result from stack
+Expression-stmt -> Expression ; #pop -> pop one to remove the statement result from stack
 Expression-stmt -> break ; #break
 Expression-stmt -> ;
 Selection-stmt -> if ( Expression ) Statement Else-stmt
@@ -34,30 +34,30 @@ Else-stmt -> else Statement endif
 Iteration-stmt -> for (Expression; Expression; Expression) Statement
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> ; | Expression ;
-Expression -> Simple-expression-zegond | ID B
-B -> = Expression | [ Expression ] H | Simple-expression-prime
-H -> = Expression | G D C
+Expression -> Simple-expression-zegond | #pid ID B
+B -> = Expression #assign | [ Expression ] #array H | Simple-expression-prime
+H -> = Expression #assign | G D C
 Simple-expression-zegond -> Additive-expression-zegond C
 Simple-expression-prime -> Additive-expression-prime C
-C -> Relop Additive-expression | ''
-Relop -> < | ==
+C -> Relop Additive-expression #calculate | ''
+Relop -> #save_operator < | #save_operator ==
 Additive-expression -> Term D
 Additive-expression-prime -> Term-prime D
 Additive-expression-zegond -> Term-zegond D
-D -> Addop Term D | ''
-Addop -> + | -
+D -> Addop Term #calculate D | ''
+Addop -> #save_operator + | #save_operator -
 Term -> Signed-factor G
 Term-prime -> Signed-factor-prime G
 Term-zegond -> Signed-factor-zegond G
-G -> * Signed-factor G | ''
-Signed-factor -> + Factor | - Factor | Factor
+G -> #save_operator * Signed-factor #calculate G | ''
+Signed-factor -> + Factor | - Factor #negate | Factor
 Signed-factor-prime -> Factor-prime
-Signed-factor-zegond -> + Factor | - Factor | Factor-zegond
-Factor -> ( Expression ) | ID Var-call-prime | NUM
+Signed-factor-zegond -> + Factor | - Factor #negate | Factor-zegond
+Factor -> ( Expression ) | #pid ID Var-call-prime | #immediate NUM
 Var-call-prime -> ( Args ) | Var-prime
-Var-prime -> [ Expression ] | ''
+Var-prime -> [ Expression ] #array | ''
 Factor-prime -> ( Args ) | ''
-Factor-zegond -> ( Expression ) | NUM
+Factor-zegond -> ( Expression ) | #immediate NUM
 Args -> Arg-list | ''
 Arg-list -> Expression Arg-list-prime
 Arg-list-prime -> , Expression Arg-list-prime | ''

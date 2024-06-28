@@ -781,6 +781,7 @@ def Expression(parent: anytree.Node) :
 
 
 	if lookahead in ['ID'] :
+		code_generator.pid()
 		Match('ID', current_node)
 		B(current_node)
 		return
@@ -823,12 +824,14 @@ def B(parent: anytree.Node) :
 		Match('[', current_node)
 		Expression(current_node)
 		Match(']', current_node)
+		code_generator.array()
 		H(current_node)
 		return
 
 	if lookahead in ['='] :
 		Match('=', current_node)
 		Expression(current_node)
+		code_generator.assign()
 		return
 
     
@@ -859,6 +862,7 @@ def H(parent: anytree.Node) :
 	if lookahead in ['='] :
 		Match('=', current_node)
 		Expression(current_node)
+		code_generator.assign()
 		return
 
     
@@ -973,10 +977,12 @@ def Relop(parent: anytree.Node) :
 
 
 	if lookahead in ['<'] :
+		code_generator.save_operator()
 		Match('<', current_node)
 		return
 
 	if lookahead in ['=='] :
+		code_generator.save_operator()
 		Match('==', current_node)
 		return
 
@@ -1094,6 +1100,7 @@ def D(parent: anytree.Node) :
 	if lookahead in ['+', '-'] :
 		Addop(current_node)
 		Term(current_node)
+		code_generator.calculate()
 		D(current_node)
 		return
 
@@ -1124,10 +1131,12 @@ def Addop(parent: anytree.Node) :
 
 
 	if lookahead in ['+'] :
+		code_generator.save_operator()
 		Match('+', current_node)
 		return
 
 	if lookahead in ['-'] :
+		code_generator.save_operator()
 		Match('-', current_node)
 		return
 
@@ -1243,8 +1252,10 @@ def G(parent: anytree.Node) :
 
 
 	if lookahead in ['*'] :
+		code_generator.save_operator()
 		Match('*', current_node)
 		Signed_factor(current_node)
+		code_generator.calculate()
 		G(current_node)
 		return
 
@@ -1286,6 +1297,7 @@ def Signed_factor(parent: anytree.Node) :
 	if lookahead in ['-'] :
 		Match('-', current_node)
 		Factor(current_node)
+		code_generator.negate()
 		return
 
     
@@ -1349,6 +1361,7 @@ def Signed_factor_zegond(parent: anytree.Node) :
 	if lookahead in ['-'] :
 		Match('-', current_node)
 		Factor(current_node)
+		code_generator.negate()
 		return
 
     
@@ -1371,6 +1384,7 @@ def Factor(parent: anytree.Node) :
 
 
 	if lookahead in ['ID'] :
+		code_generator.pid()
 		Match('ID', current_node)
 		Var_call_prime(current_node)
 		return
@@ -1383,6 +1397,7 @@ def Factor(parent: anytree.Node) :
 
 
 	if lookahead in ['NUM'] :
+		code_generator.immediate()
 		Match('NUM', current_node)
 		return
 
@@ -1510,6 +1525,7 @@ def Factor_zegond(parent: anytree.Node) :
 
 
 	if lookahead in ['NUM'] :
+		code_generator.immediate()
 		Match('NUM', current_node)
 		return
 

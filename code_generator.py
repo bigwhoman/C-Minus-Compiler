@@ -6,6 +6,17 @@ class Constants(IntEnum):
     INT_TYPE = 1
     VOID_TYPE = 2
 
+class VariableScope(Enum):
+    GLOBAL_VARIABLE = 1
+    LOCAL_VARIABLE = 2
+
+class MathOperator(Enum):
+    PLUS = 1
+    MINUS = 2
+    MULT = 3
+    LESS_THAN = 4
+    EQUALS = 5
+
 class VariableType(Enum):
     """
     Type of the variable in symbol table
@@ -113,6 +124,16 @@ class SemanticAnalyzer:
                 if lexeme == entry.lexeme:
                     return entry
         return None
+    
+    def is_global_variable(self, lexeme: str) -> bool:
+        """
+        Checks if a variable is a global variable or not.
+        It simply checks if it has been declared in the first scope stack or not.
+        """
+        for entry in self.scope_stack[0]:
+            if lexeme == entry.lexeme:
+                return True
+        return False
 
     def declare_variable(self, name: str):
         """
@@ -234,6 +255,14 @@ class RAX():
     RAX_ADDRESS = 108
     def __init__(self):
         self.address = self.RAX_ADDRESS
+class TempRegisters():
+    """
+    Temp registers required for variable address calculations
+    """
+    TEMP_R1 = 112
+    TEMP_R2 = 116
+    TEMP_R3 = 120
+    TEMP_R4 = 124
 
 class CodeGenerator:
     FIRST_GLOBAL_VARIABLE_ADDRESS = 100
@@ -246,7 +275,7 @@ class CodeGenerator:
         self.semantic_analyzer = SemanticAnalyzer()
         self.program_block = ProgramBlock()
         # We always define stack pointer the first global variable
-        self.declared_global_variables = 1
+        self.declared_global_variables = 10
         # Name of the variable we are declaring
         self.declaring_pid_value: Union[None, str] = None
         # List of parameters of function we are declaring
@@ -257,6 +286,14 @@ class CodeGenerator:
         self.eax = EAX()
         # Setup RAX
         self.rax = RAX()
+        # Setup temp registers
+        self.temp_registers = TempRegisters()
+        # Each time we want to push an address into ss, we push if it's global or local
+        # in this stack
+        self.pid_scope_stack: list[VariableScope] = []
+        # Each time we want to push an operator in the stack, instead of pushing it into ss
+        # we push it here to make everything clear
+        self.operator_stack: list[MathOperator] = []
         # initiallize Stack pointer and EAX
         self.initiallize()
 
@@ -273,6 +310,31 @@ class CodeGenerator:
                                 ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                             [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                 ThreeAddressInstructionOperand(self.rax.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
+    
+    def find_absolute_address(self, address: int, scope: VariableScope, temp_register: int):
+        """
+        This function is intended to generate runtime code to move the address of a variable to
+        a temporary register.
+        """
+        if scope == VariableScope.GLOBAL_VARIABLE:
+            # In this case, just generate code to move the address to temp register
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                    # TEMP_REG = #Address
+                    ThreeAddressInstructionOpcode.ASSIGN,
+                    [
+                        ThreeAddressInstructionOperand(address, ThreeAddressInstructionNumberType.IMMEDIATE),
+                        ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                    ]))
+        else:
+            # Add the stack pointer to the register address and boom
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                    # TEMP_REG = SP + #Address
+                    ThreeAddressInstructionOpcode.ADD,
+                    [
+                        ThreeAddressInstructionOperand(address, ThreeAddressInstructionNumberType.IMMEDIATE),
+                        ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                        ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                    ]))
 
     def int_type(self):
         self.ss.append(int(Constants.INT_TYPE))
@@ -281,6 +343,10 @@ class CodeGenerator:
         self.ss.append(int(Constants.VOID_TYPE))
 
     def declaring_pid(self):
+        """
+        Declaring pid is called when we are declaring a new variable. In this case,
+        we should keep the pid as string in order to define the variable later.
+        """
         assert self.scanner.lookahead_token[0] == scanner.TokenType.ID
         assert self.declaring_pid_value == None
         self.declaring_pid_value = self.scanner.lookahead_token[1]
@@ -475,4 +541,101 @@ class CodeGenerator:
         variable and thus we can assign addresses to them.
         """
         self.semantic_analyzer.assign_scope_addresses()
-        # TODO: generate code to assign the address of arrays
+        # Generate code to assign the address of arrays
+        for variable in self.semantic_analyzer.scope_stack[-1]:
+            # TODO: should this be > 0 or >= 0?
+            if variable.var_type == VariableType.INT_ARRAY and variable.parameters > 0:
+                # Find the address of the array pointer
+                self.program_block.add_instruction(ThreeAddressInstruction(
+                    # R1 = SP + address
+                    ThreeAddressInstructionOpcode.ADD,
+                    [
+                        ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                        ThreeAddressInstructionOperand(variable.address, ThreeAddressInstructionNumberType.IMMEDIATE),
+                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                    ]))
+                # Set the array pointer to first data
+                self.program_block.add_instruction(ThreeAddressInstruction(
+                    # [R1] = SP + address + 4
+                    ThreeAddressInstructionOpcode.ADD,
+                    [
+                        ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                        # Skip the pointer itself and point to data
+                        ThreeAddressInstructionOperand(variable.address + 4, ThreeAddressInstructionNumberType.IMMEDIATE),
+                        # Put it in the 
+                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ]))
+
+    def pid(self):
+        """
+        Push the PID in stack and check if it actually exists
+        """
+        assert self.scanner.lookahead_token[0] == scanner.TokenType.ID
+        # Get the entry from semantic analyzer
+        variable = self.semantic_analyzer.get_entry(self.scanner.lookahead_token[1])
+        if variable == None:
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! '{self.scanner.lookahead_token[1]}' is not defined")
+            return
+        # Get the address of variable
+        global_variable = self.semantic_analyzer.is_global_variable(self.scanner.lookahead_token[1])
+        if global_variable:
+            self.pid_scope_stack.append(VariableScope.GLOBAL_VARIABLE)
+        else:
+            self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
+        self.ss.append(variable.address)
+
+    def save_operator(self):
+        """
+        Save the next operator in scanner into 
+        """
+        if self.scanner.lookahead_token[1] == "+":
+            self.operator_stack.append(MathOperator.PLUS)
+        elif self.scanner.lookahead_token[1] == "-":
+            self.operator_stack.append(MathOperator.MINUS)
+        elif self.scanner.lookahead_token[1] == "*":
+            self.operator_stack.append(MathOperator.MULT)
+        elif self.scanner.lookahead_token[1] == "<":
+            self.operator_stack.append(MathOperator.LESS_THAN)
+        elif self.scanner.lookahead_token[1] == "==":
+            self.operator_stack.append(MathOperator.EQUALS)
+        else:
+            raise Exception("SHASH AZIM")
+    
+    def assign(self):
+        """
+        In assign, the top of the stack should be the right hand side variable.
+        The value below it is the left hand side.
+
+        After this function executes, we will leave a pointer to result in the stack.
+        (we will not pop the value below it.)
+        """
+        print("ASSIGN")
+        # Get the source
+        src_address = self.ss.pop()
+        src_scope = self.pid_scope_stack.pop()
+        # Get the dest
+        dst_address = self.ss[-1]
+        dst_scope = self.pid_scope_stack[-1]
+        # Put the addresses in temp variables
+        self.find_absolute_address(src_address, src_scope, self.temp_registers.TEMP_R1)
+        self.find_absolute_address(dst_address, dst_scope, self.temp_registers.TEMP_R2)
+        # [R2] = [R1]
+        self.program_block.add_instruction(ThreeAddressInstruction(
+                    ThreeAddressInstructionOpcode.ASSIGN,
+                    [
+                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ]))
+        print("DONE")
+    
+    def array(self):
+        pass
+
+    def calculate(self):
+        pass
+
+    def immediate(self):
+        pass
+
+    def negate(self):
+        pass
