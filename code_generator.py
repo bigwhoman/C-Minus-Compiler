@@ -28,7 +28,7 @@ class SymbolTableEntry:
         self.parameters = parameters
         # The address is either the absolute address if this is global variable.
         # Otherwise it is the offset of this variable from top of the stack.
-        self.address = 0
+        self.address = -1
 
     def __repr__(self) -> str:
         return str(self)
@@ -154,7 +154,47 @@ class SemanticAnalyzer:
         assert self.scope_stack[-2][-1].var_type in [VariableType.INT_FUNCTION, VariableType.VOID_FUNCTION]
         # Set the params
         self.scope_stack[-2][-1].parameters = arguments
+
+    def assign_scope_addresses(self):
+        """
+        Assign the addresses to scope variables.
+
+        This is done by iterating over all previous variables and increasing an offset
+        """
+        scope = self.scope_stack[-1]
+        if len(scope) == 0: # welp...
+            return
+        if scope[0].address != -1: # we have already assigned the addresses
+            # We reach here in for/if statements
+            return
+        # We should assign addresses
+        declared_variable_count = 0
+        for entry in scope:
+            assert entry.address == -1 # nothing should be assigned
+            if entry.var_type == VariableType.INT:
+                entry.address = declared_variable_count * 4 # each variable is 4 bytes
+                declared_variable_count += 1
+            elif entry.var_type == VariableType.INT_ARRAY:
+                # In case of array we should declare a space for array pointer
+                entry.address = declared_variable_count * 4 # pointer is 4 bytes
+                declared_variable_count += 1
+                if entry.parameters != -1: # -1 is when this is the argument
+                    declared_variable_count += entry.parameters # get space just after the pointer
+            else:
+                raise Exception("SHASH AZIM")
     
+    def get_temp(self) -> int:
+        """
+        Gets the offset of a temporary variables from top of the stack
+        """
+        if len(self.scope_stack[-1]) == 0:
+            tmp_address = 0
+        else:
+            tmp_address = self.scope_stack[-1][-1].address + 4
+        self.scope_stack[-1].append(SymbolTableEntry("_temp_var", VariableType.INT, None))
+        self.scope_stack[-1][-1].address = tmp_address
+        return tmp_address
+
 
 class ProgramBlock:
     def __init__(self):
@@ -428,3 +468,11 @@ class CodeGenerator:
 
     def pop_int_type(self):
         assert self.ss.pop() == int(Constants.INT_TYPE)
+
+    def variables_declared(self):
+        """
+        When the statement of a function is being parsed, after the very first of it, we have declared every
+        variable and thus we can assign addresses to them.
+        """
+        self.semantic_analyzer.assign_scope_addresses()
+        # TODO: generate code to assign the address of arrays
