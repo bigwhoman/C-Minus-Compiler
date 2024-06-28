@@ -33,7 +33,7 @@ Else-stmt -> endif
 Else-stmt -> else Statement endif
 Iteration-stmt -> for (Expression; Expression; Expression) Statement
 Return-stmt -> return Return-stmt-prime
-Return-stmt-prime -> ; | Expression ;
+Return-stmt-prime -> ; | Expression #return_func ;
 Expression -> Simple-expression-zegond | #pid ID B
 B -> = Expression #assign | [ Expression ] #array H | Simple-expression-prime
 H -> = Expression #assign | G D C
@@ -56,7 +56,7 @@ Signed-factor-zegond -> + Factor | - Factor #negate | Factor-zegond
 Factor -> ( Expression ) | #pid ID Var-call-prime | #immediate NUM
 Var-call-prime -> ( Args ) | Var-prime
 Var-prime -> [ Expression ] #array | ''
-Factor-prime -> ( Args ) | ''
+Factor-prime ->  #call ( Args ) | ''
 Factor-zegond -> ( Expression ) | #immediate NUM
 Args -> Arg-list | ''
 Arg-list -> Expression Arg-list-prime
