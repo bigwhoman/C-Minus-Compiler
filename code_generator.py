@@ -621,11 +621,11 @@ class CodeGenerator:
         self.find_absolute_address(dst_address, dst_scope, self.temp_registers.TEMP_R2)
         # [R2] = [R1]
         self.program_block.add_instruction(ThreeAddressInstruction(
-                    ThreeAddressInstructionOpcode.ASSIGN,
-                    [
-                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                    ]))
+            ThreeAddressInstructionOpcode.ASSIGN,
+            [
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            ]))
 
     def immediate(self):
         """
@@ -641,20 +641,104 @@ class CodeGenerator:
         # Create the code
         # [R1] = #Number
         self.program_block.add_instruction(ThreeAddressInstruction(
-                    ThreeAddressInstructionOpcode.ASSIGN,
-                    [
-                        ThreeAddressInstructionOperand(int(self.scanner.lookahead_token[1]), ThreeAddressInstructionNumberType.IMMEDIATE),
-                        ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                    ]))
+            ThreeAddressInstructionOpcode.ASSIGN,
+            [
+                ThreeAddressInstructionOperand(int(self.scanner.lookahead_token[1]), ThreeAddressInstructionNumberType.IMMEDIATE),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            ]))
         # Put data in the stack
         self.ss.append(tmp_address)
         self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
 
     def calculate(self):
-        pass
+        """
+        Calculate will calculate the result of a mathematical expression
 
+        Will leave the address of result in stack.
+        """
+        # Get variables from stack
+        s2_address = self.ss.pop()
+        s2_scope = self.pid_scope_stack.pop()
+        s1_address = self.ss.pop()
+        s1_scope = self.pid_scope_stack.pop()
+        tmp_variable = self.semantic_analyzer.get_temp()
+        # Generate codes to put the address in temp variables
+        self.find_absolute_address(s1_address, s1_scope, self.temp_registers.TEMP_R1)
+        self.find_absolute_address(s2_address, s2_scope, self.temp_registers.TEMP_R2)
+        self.find_absolute_address(tmp_variable, VariableScope.LOCAL_VARIABLE, self.temp_registers.TEMP_R3)
+        # Do the thing needed
+        operation = self.operator_stack.pop()
+        if operation == MathOperator.PLUS:
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                ThreeAddressInstructionOpcode.ADD,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ]))
+        elif operation == MathOperator.MINUS:
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                ThreeAddressInstructionOpcode.SUB,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ]))
+        elif operation == MathOperator.MULT:
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                ThreeAddressInstructionOpcode.MULT,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ]))
+        elif operation == MathOperator.LESS_THAN:
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                ThreeAddressInstructionOpcode.LT,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ]))
+        elif operation == MathOperator.EQUALS:
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                ThreeAddressInstructionOpcode.EQ,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ]))
+        else:
+            raise Exception("SHASH")
+        # Add the result to stack
+        self.ss.append(tmp_variable)
+        self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
+                
     def negate(self):
-        pass
+        """
+        Negate will get the value on top of the stack,
+        negate it,
+        and push it back
+        """
+        # Get the addresses
+        address = self.ss.pop()
+        scope = self.pid_scope_stack.pop()
+        tmp_variable = self.semantic_analyzer.get_temp()
+        # Move the address to array
+        self.find_absolute_address(address, scope, self.temp_registers.TEMP_R1)
+        self.find_absolute_address(tmp_variable, VariableScope.LOCAL_VARIABLE, self.temp_registers.TEMP_R2)
+        # Negate it
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            # [R2] = 0 - [R1]
+            ThreeAddressInstructionOpcode.SUB,
+            [
+                ThreeAddressInstructionOperand(0, ThreeAddressInstructionNumberType.IMMEDIATE),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            ]))
+        # Push back the result
+        self.ss.append(tmp_variable)
+        self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
 
     def array(self):
         pass
