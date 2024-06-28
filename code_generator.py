@@ -164,7 +164,7 @@ class ProgramBlock:
         self.program = open("./PB.txt","w")
 
     def add_instruction(self,ThreeAddressInstruction, i=None):
-        print(ThreeAddressInstruction)
+        print(self.pc, ThreeAddressInstruction)
         # Add instruction to program block 
         if i == None :
             self.program_block.append(ThreeAddressInstruction)
@@ -195,13 +195,19 @@ class RAX():
     def __init__(self):
         self.address = self.RAX_ADDRESS
 
+class PC():
+    "General purpose register"
+    PC_ADDRESS = 128
+    def __init__(self):
+        self.address = self.PC_ADDRESS
+
 class CodeGenerator:
     FIRST_GLOBAL_VARIABLE_ADDRESS = 100
     FIRST_TEMP_VARIABLE_ADDRESS = 500
 
 
     def __init__(self, scanner: scanner.Scanner):
-        self.ss: list[int] = []  # Semantic stack
+        self.ss: list[int] = [12, 22]  # Semantic stack
         self.scanner = scanner
         self.semantic_analyzer = SemanticAnalyzer()
         self.program_block = ProgramBlock()
@@ -217,6 +223,8 @@ class CodeGenerator:
         self.eax = EAX()
         # Setup RAX
         self.rax = RAX()
+        # Setup PC
+        self.pc = PC()
         # initiallize Stack pointer and EAX
         self.initiallize()
 
@@ -233,7 +241,10 @@ class CodeGenerator:
                                 ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                             [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                 ThreeAddressInstructionOperand(self.rax.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
-
+            self.program_block.add_instruction(
+                                ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                            [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                ThreeAddressInstructionOperand(self.pc.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
     def int_type(self):
         self.ss.append(int(Constants.INT_TYPE))
 
@@ -299,7 +310,7 @@ class CodeGenerator:
         # When a function starts, we need to modify the stack and stack pointer first
         # We first save the return address and the return program block
         # TODO : When get temp is completed do this 
-
+        print("Start Func ----------------")
         # Sp points to the pc 
         self.sp.pointer -= 8
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
@@ -310,7 +321,7 @@ class CodeGenerator:
 
         # Save the last pc for later use
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                        [ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
         self.sp.pointer -= 4
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
@@ -351,10 +362,35 @@ class CodeGenerator:
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(8, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-         
-        print(self.sp.pointer)
+        
+        print("Shoomb Start +++++++++++++++++++++++++++")
         # Now the stack pointer is pointing at the first local variable
-             
+    
+    def return_func(self) : 
+        "Return value from a fuction"
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
+                                                                        [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                                ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))        
+
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(self.ss.pop(), ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
+                                                                        [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                                ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+    
+    def call(self):
+        print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
+                                                                        [ThreeAddressInstructionOperand(self.semantic_analyzer.get_entry(), ThreeAddressInstructionNumberType.IMMEDIATE)]  ))        
+        print("Shoomb Call aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
     def scalar_param(self):
         """
         If we see an scalar parameter, just declare it as a variable.
@@ -389,6 +425,7 @@ class CodeGenerator:
         When the function ends, we pop the scope and remove the
         block from stack
         """
+        print("Shoomb END ++++++++++++++++++++++++++++")
         self.semantic_analyzer.exit_scope()
         self.sp.pointer -= 4
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
@@ -421,10 +458,10 @@ class CodeGenerator:
 
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                                                                                ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+                                                                                ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         print(self.sp.pointer)
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
-                                                                        [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)])) 
-
+                                                                        [ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)])) 
+        print("End func -------------------")
     def pop_int_type(self):
         assert self.ss.pop() == int(Constants.INT_TYPE)

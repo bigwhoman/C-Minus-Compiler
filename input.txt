@@ -1,8 +1,12 @@
 int a;
 int b;
 
-void myfunction(void) {
+int funco(){
+	return 12;
+}
 
+void myfunction(void) {
+	int a = funco();
 }
 
 
