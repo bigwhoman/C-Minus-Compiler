@@ -156,25 +156,46 @@ class SemanticAnalyzer:
         self.scope_stack[-2][-1].parameters = arguments
     
 
+class ProgramBlock:
+    def __init__(self):
+        self.program_block: list[ThreeAddressInstruction] = []
+        self.pc = 1
+        # Create a file for program blocks
+        self.program = open("./PB.txt","w")
+
+    def add_instruction(self,ThreeAddressInstruction):
+        self.program_block.append(ThreeAddressInstruction)
+        self.pc += 1
+
+    
+    def get_pc(self) -> int :
+        return self.pc
 class CodeGenerator:
     FIRST_GLOBAL_VARIABLE_ADDRESS = 100
     STACK_POINTER_ADDRESS = FIRST_GLOBAL_VARIABLE_ADDRESS
     FIRST_TEMP_VARIABLE_ADDRESS = 500
-    TOP_STACK_ADDRESS = 1000
+    TOP_STACK_ADDRESS = 0xbfffffff
 
     def __init__(self, scanner: scanner.Scanner):
         self.ss: list[int] = []  # Semantic stack
         self.scanner = scanner
         self.semantic_analyzer = SemanticAnalyzer()
+        self.program_block = ProgramBlock()
         # We always define stack pointer the first global variable
         self.declared_global_variables = 1
-        self.pc = 1  # Program counter
-        self.program_block: list[ThreeAddressInstruction] = []
         # Name of the variable we are declaring
         self.declaring_pid_value: Union[None, str] = None
         # List of parameters of function we are declaring
         self.declaring_function_params: Union[None, list[VariableType]] = None
+        # Top of Stack pointer, initially set to 0xbfffffff 
+        self.top_sp = self.TOP_STACK_ADDRESS
+        # initiallize Stack pointer and shit
+        self.initiallize()
 
+    def initiallize(self) :
+            self.program_block.add_instruction(
+                                ThreeAddressInstruction())
+            
     def int_type(self):
         self.ss.append(int(Constants.INT_TYPE))
 
@@ -232,7 +253,7 @@ class CodeGenerator:
         assert self.declaring_function_params == None
         return_type = self.ss.pop()
         assert return_type in [int(Constants.INT_TYPE), int(Constants.VOID_TYPE)]
-        self.semantic_analyzer.declare_function(self.declaring_pid_value, return_type, self.pc)
+        self.semantic_analyzer.declare_function(self.declaring_pid_value, return_type, self.program_block.get_pc())
         self.declaring_pid_value = None
         self.declaring_function_params = [] # create a fresh list of parameters
         self.semantic_analyzer.enter_scope()
