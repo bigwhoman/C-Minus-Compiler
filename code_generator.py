@@ -244,7 +244,12 @@ class ProgramBlock:
         self.program_block: list[ThreeAddressInstruction] = []
         self.pc = 0
         self.pc_stack = []
-
+        self.return_stack = []
+    def add_return(self):
+        self.return_stack.append(self.pc)
+        self.pc += 1
+        self.program_block.append("Return Empty")
+        return
     def add_instruction(self,ThreeAddressInstruction, i=None, empty=None):
         if empty != None :
             print("Chopi ", self.pc)
@@ -271,9 +276,9 @@ class ProgramBlock:
         return self.pc
 
 class StackPointer():
-    TOP_STACK_ADDRESS = 100000
+    TOP_STACK_ADDRESS = 10000000
     STACK_POINTER_ADDRESS = 100
-    STACK_SIZE = 4096
+    STACK_SIZE = 1000
     def __init__(self):
         self.stack_size = self.STACK_SIZE
         self.pointer = self.TOP_STACK_ADDRESS
@@ -677,13 +682,11 @@ class CodeGenerator:
                                                                         [ThreeAddressInstructionOperand(0, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
         # self.program_block.add_instruction(ThreeAddressInstruction(
-        #         # PRINT(R2)
         #         ThreeAddressInstructionOpcode.PRINT,
         #         [
         #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
         #         ]))
         # self.program_block.add_instruction(ThreeAddressInstruction(
-        #         # PRINT(R2)
         #         ThreeAddressInstructionOpcode.PRINT,
         #         [
         #             ThreeAddressInstructionOperand(112, ThreeAddressInstructionNumberType.IMMEDIATE),
@@ -779,6 +782,20 @@ class CodeGenerator:
         print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
         print(self.pid_scope_stack)
+        # self.find_absolute_address(self.ss[-1], self.pid_scope_stack[-1], self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))  
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))  
         self.program_block.add_instruction("", empty=True)
     
     def jpf(self):
@@ -787,7 +804,7 @@ class CodeGenerator:
         print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
         print(self.pid_scope_stack)
-        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
         #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
@@ -802,10 +819,24 @@ class CodeGenerator:
         print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
         print(self.pid_scope_stack)
-        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))  
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))        
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-        #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        #
+        #                                                                      ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JPF,
                                                                         [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                          ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE)]
@@ -813,6 +844,7 @@ class CodeGenerator:
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
         #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        # self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
         self.program_block.add_instruction("", empty= True)
     
     def jp(self):
@@ -827,7 +859,9 @@ class CodeGenerator:
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
                                                                         [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE)]
                                                                                 ),i = self.program_block.pc_stack.pop())
-
+    def jump_to_end(self):
+        print("ppppppppppppooooooooooopppppppppppppppppp")
+        self.program_block.add_return()
     def call(self):
         print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         print(self.ss)
@@ -837,6 +871,13 @@ class CodeGenerator:
             self.is_outputting = False
             # Load the address in registers
             self.find_absolute_address(self.ss[-1], self.pid_scope_stack[-1], self.temp_registers.TEMP_R1)
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                # PRINT(R2)
+                ThreeAddressInstructionOpcode.PRINT,
+                [
+                    ThreeAddressInstructionOperand(999999999999999, ThreeAddressInstructionNumberType.IMMEDIATE),
+                ]))
+                  
             self.program_block.add_instruction(ThreeAddressInstruction(
                 # PRINT(R2)
                 ThreeAddressInstructionOpcode.PRINT,
@@ -875,7 +916,13 @@ class CodeGenerator:
                                                                             ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
             self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                                                                            ThreeAddressInstructionOperand(self.arg_mem.address + 4 * i, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))            
+                                                                            ThreeAddressInstructionOperand(self.arg_mem.address + 4 * i, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #     # PRINT(R2)
+            #     ThreeAddressInstructionOpcode.PRINT,
+            #     [
+            #         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            #     ]))            
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                             [ThreeAddressInstructionOperand(self.program_block.get_pc() + 2, ThreeAddressInstructionNumberType.IMMEDIATE),
         #                                                                 ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))            
@@ -976,7 +1023,10 @@ class CodeGenerator:
         print("END ++++++++++++++++++++++++++++")
         self.semantic_analyzer.exit_scope()
         self.sp.pointer -= 4
-        
+        for i in range(len(self.program_block.return_stack)) :
+            self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
+                                                                            [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE)]  )
+                                                                            , i = self.program_block.return_stack.pop())
         # self.program_block.add_instruction(ThreeAddressInstruction(
         #         # PRINT(R2)
         #         ThreeAddressInstructionOpcode.PRINT,
@@ -1342,6 +1392,42 @@ class CodeGenerator:
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                 ]))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #         # PRINT(R2)
+            #         ThreeAddressInstructionOpcode.PRINT,
+            #         [
+            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+            #         ]))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #         # PRINT(R2)
+            #         ThreeAddressInstructionOpcode.PRINT,
+            #         [
+            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            #         ]))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #         # PRINT(R2)
+            #         ThreeAddressInstructionOpcode.PRINT,
+            #         [
+            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+            #         ]))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #         # PRINT(R2)
+            #         ThreeAddressInstructionOpcode.PRINT,
+            #         [
+            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            #         ]))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #         # PRINT(R2)
+            #         ThreeAddressInstructionOpcode.PRINT,
+            #         [
+            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+            #         ]))
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #         # PRINT(R2)
+            #         ThreeAddressInstructionOpcode.PRINT,
+            #         [
+            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            #         ]))          
         elif operation == MathOperator.EQUALS:
             self.program_block.add_instruction(ThreeAddressInstruction(
                 ThreeAddressInstructionOpcode.EQ,

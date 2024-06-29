@@ -740,6 +740,7 @@ def Return_stmt(parent: anytree.Node) :
 	if lookahead in ['return'] :
 		Match('return', current_node)
 		Return_stmt_prime(current_node)
+		code_generator.jump_to_end()
 		return
 
     
