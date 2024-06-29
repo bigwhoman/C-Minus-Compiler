@@ -82,6 +82,12 @@ class ThreeAddressInstructionOpcode(Enum):
     JP = 8
     PRINT = 9
 
+    def __str__(self):
+        return str(self.name)
+    
+    def __repr__(self) -> str:
+        return str(self.name)
+
 class ThreeAddressInstruction:
     """
     Each emitted instruction should be this type
@@ -638,6 +644,7 @@ class CodeGenerator:
         variable and thus we can assign addresses to them.
         """
         self.semantic_analyzer.assign_scope_addresses()
+        print("DECLARING VARS BEGIN")
         # Generate code to assign the address of arrays
         for variable in self.semantic_analyzer.scope_stack[-1]:
             # TODO: should this be > 0 or >= 0?
@@ -662,6 +669,7 @@ class CodeGenerator:
                         # Put it in the 
                         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ]))
+        print("DECLARING VARS END")
 
     def pid(self):
         """
@@ -840,3 +848,11 @@ class CodeGenerator:
 
     def array(self):
         pass
+
+    def pop_expression(self):
+        """
+        Pops the result of an expression from stack
+        """
+        self.ss.pop()
+        self.pid_scope_stack.pop()
+        print("SIZE", self.pid_scope_stack, self.ss, self.operator_stack)

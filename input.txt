@@ -1,11 +1,10 @@
-int funco(int a, int b){
-	return a+b;
-}
+void main(void) {
+	int c;
+	int d;
+	int a;
+    int shash;
 
-void myfunction(void) {
- 	int c = 5;
- 	int d = 12;
-	int a = funco(c, d); 
+    shash = a = (c + d) * -c;
 }
 
 

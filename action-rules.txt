@@ -25,7 +25,7 @@ Statement -> Compound-stmt
 Statement -> Selection-stmt 
 Statement -> Iteration-stmt 
 Statement -> Return-stmt
-Expression-stmt -> Expression ; #pop -> pop one to remove the statement result from stack
+Expression-stmt -> Expression ; #pop_expression -> pop one to remove the statement result from stack
 Expression-stmt -> break ; #break
 Expression-stmt -> ;
 Selection-stmt -> if ( Expression ) Statement Else-stmt
