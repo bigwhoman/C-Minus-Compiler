@@ -353,6 +353,8 @@ class CodeGenerator:
                                 ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                             [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                 ThreeAddressInstructionOperand(self.pc.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
+            
+            self.program_block.add_instruction("",empty=True)
            
         # for inst in self.program_block.program_block() :
         #     print(inst)
@@ -396,6 +398,10 @@ class CodeGenerator:
         assert self.scanner.lookahead_token[0] == scanner.TokenType.ID
         assert self.declaring_pid_value == None
         self.declaring_pid_value = self.scanner.lookahead_token[1]
+        if self.declaring_pid_value == "main" :
+                    self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE)]
+                                                                                ),i = self.program_block.pc_stack.pop())
 
     def variable_declared(self):
         assert self.declaring_pid_value != None
