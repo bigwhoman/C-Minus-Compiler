@@ -1,3 +1,8 @@
+int funco(int a, int b){
+   return a+b;
+}
+
+
 void myfunction(void) {
  	int c;
  	int d;
@@ -6,5 +11,3 @@ void myfunction(void) {
  	d = 5;
 	a = c + funco(c, d); 
 }
-
-

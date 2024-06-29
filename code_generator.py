@@ -293,7 +293,7 @@ class CodeGenerator:
 
 
     def __init__(self, scanner: scanner.Scanner):
-        self.ss: list[int] = [12, 22]  # Semantic stack
+        self.ss: list[int] = []  # Semantic stack
         self.scanner = scanner
         self.semantic_analyzer = SemanticAnalyzer()
         self.param_leftover = []
@@ -504,19 +504,23 @@ class CodeGenerator:
     
     def return_func(self) : 
         "Return value from a fuction"
+        print("Start Returnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))        
 
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(self.ss.pop(), ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                        [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
 
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        print("Shoomb Returnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
     def push_param(self) :
         self.func_params += 1
 
@@ -524,16 +528,16 @@ class CodeGenerator:
         print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         self.arg_mem.reset()
         fixed_args = []
-        print(self.ss)
         
         for i in range(self.arg_num) :
-            fixed_args.append(self.ss.pop())
+            fixed_args.append([self.ss.pop(), self.pid_scope_stack.pop()])
             # print("sag ", self.pid_scope_stack.pop())
         print(self.ss)
         print(self.pid_scope_stack)
         for i in range(self.arg_num) : 
+            self.find_absolute_address(fixed_args[len(fixed_args) - 1 - i][0], fixed_args[len(fixed_args) - 1 - i][0], self.temp_registers.TEMP_R1)
             self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(fixed_args[len(fixed_args) - 1 - i], ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                        [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.arg_mem.address + 4 * i, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))            
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                             [ThreeAddressInstructionOperand(self.program_block.get_pc() + 2, ThreeAddressInstructionNumberType.IMMEDIATE),
@@ -612,6 +616,9 @@ class CodeGenerator:
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        
+        self.ss.append(self.eax.address)
+        self.pid_scope_stack.append(VariableScope.GLOBAL_VARIABLE)
         self.sp.pointer -= 8
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),

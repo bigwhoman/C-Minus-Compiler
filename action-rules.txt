@@ -54,7 +54,7 @@ Signed-factor -> + Factor | - Factor #negate | Factor
 Signed-factor-prime -> Factor-prime
 Signed-factor-zegond -> + Factor | - Factor #negate | Factor-zegond
 Factor -> ( Expression ) | #pid ID Var-call-prime | #immediate NUM
-Var-call-prime -> ( Args ) | Var-prime
+Var-call-prime -> ( Args ) #call | Var-prime
 Var-prime -> [ Expression ] #array | ''
 Factor-prime ->    ( Args ) #call | ''
 Factor-zegond -> ( Expression ) | #immediate NUM

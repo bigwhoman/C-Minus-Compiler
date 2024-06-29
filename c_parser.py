@@ -1438,6 +1438,7 @@ def Var_call_prime(parent: anytree.Node) :
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
+		code_generator.call()
 		return
 
     
