@@ -21,6 +21,7 @@ def main():
         c_parser.S(main_program)
     except SyntaxError as e: # TODO: use something else. For example self made class
         pass # Unexpected EOF
+    c_parser.code_generator.program_block.dump()
 
 if __name__ == "__main__":
     main()

@@ -1,14 +1,9 @@
-int a[10];
-int b;
-
 void main(void) {
-	int d;
-    int c[10];
-    int tmp;
-    tmp = a[b];
-    tmp = a[d];
-    tmp = c[b];
-    tmp = c[d];
+	int a;
+    int b;
+
+    a = 1;
+    b = 2;
+    output(a);
+    output(b);
 }
-
-

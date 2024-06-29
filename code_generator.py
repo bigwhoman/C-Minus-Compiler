@@ -227,8 +227,6 @@ class ProgramBlock:
     def __init__(self):
         self.program_block: list[ThreeAddressInstruction] = []
         self.pc = 1
-        # Create a file for program blocks
-        self.program = open("./PB.txt","w")
 
     def add_instruction(self,ThreeAddressInstruction, i=None, empty=None):
         if empty != None :
@@ -241,7 +239,11 @@ class ProgramBlock:
             self.pc += 1
         else :
             self.program_block[i] = ThreeAddressInstruction
-
+        
+    def dump(self):
+        with open("output.txt", "w") as code:
+            for i, block in enumerate(self.program_block):
+                code.write(f"{i}\t{block}\n")
     
     def get_pc(self) -> int :
         return self.pc
@@ -323,6 +325,8 @@ class CodeGenerator:
         self.operator_stack: list[MathOperator] = []
         # Setup PC
         self.pc = PC()
+        # True if the call output is being used
+        self.is_outputting = False
         # initiallize Stack pointer and EAX
         self.initiallize()
 
@@ -522,6 +526,22 @@ class CodeGenerator:
 
     def call(self):
         print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        if self.is_outputting:
+            self.is_outputting = False
+            # Load the address in registers
+            self.find_absolute_address(self.ss[-1], self.pid_scope_stack[-1], self.temp_registers.TEMP_R1)
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                # PRINT(R2)
+                ThreeAddressInstructionOpcode.PRINT,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ]))
+            # NOTE: We do not push anything to stack here. This is because that the
+            # Expression-stmt will pop the last variable in stack. To fix this, we push a dummy
+            # value in the stack always. But this time, because we have the argument in stack,
+            # we do not push anything and thus the Expression-stmt will remove it.
+            return
+
         self.arg_mem.reset()
         fixed_args = []
         print(self.ss)
@@ -679,6 +699,10 @@ class CodeGenerator:
         Push the PID in stack and check if it actually exists
         """
         assert self.scanner.lookahead_token[0] == scanner.TokenType.ID
+        # Is this the output function?
+        if self.scanner.lookahead_token[1] == "output":
+            self.is_outputting = True
+            return
         # Get the entry from semantic analyzer
         variable = self.semantic_analyzer.get_entry(self.scanner.lookahead_token[1])
         if variable == None:
