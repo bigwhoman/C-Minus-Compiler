@@ -952,6 +952,7 @@ def C(parent: anytree.Node) :
 	if lookahead in ['<', '=='] :
 		Relop(current_node)
 		Additive_expression(current_node)
+		code_generator.calculate()
 		return
 
     
