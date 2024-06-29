@@ -31,7 +31,7 @@ Expression-stmt -> ;
 Selection-stmt -> if ( Expression ) Statement Else-stmt
 Else-stmt -> endif
 Else-stmt -> else Statement endif
-Iteration-stmt -> for (Expression; Expression; Expression) Statement
+Iteration-stmt -> for (Expression #pop_expression; #for_condition_start Expression #for_condition_end; #for_step_begin Expression #pop_expression #for_step_end) #for_body_begin Statement #for_end
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> ; | Expression #return_func ;
 Expression -> Simple-expression-zegond | #pid ID B
