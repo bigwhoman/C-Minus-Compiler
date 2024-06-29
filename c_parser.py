@@ -570,6 +570,7 @@ def Expression_stmt(parent: anytree.Node) :
 	if lookahead in ['ID', 'NUM', '(', '+', '-'] :
 		Expression(current_node)
 		Match(';', current_node)
+		code_generator.pop_expression()
 		return
 
 	if lookahead in [';'] :
