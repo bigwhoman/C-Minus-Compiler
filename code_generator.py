@@ -273,7 +273,9 @@ class ProgramBlock:
 class StackPointer():
     TOP_STACK_ADDRESS = 100000
     STACK_POINTER_ADDRESS = 100
+    STACK_SIZE = 4096
     def __init__(self):
+        self.stack_size = self.STACK_SIZE
         self.pointer = self.TOP_STACK_ADDRESS
         self.address = self.STACK_POINTER_ADDRESS
 
@@ -598,7 +600,7 @@ class CodeGenerator:
         self.sp.pointer -= 100
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                                                                            ThreeAddressInstructionOperand(100, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.sp.stack_size, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
 
 
@@ -773,9 +775,18 @@ class CodeGenerator:
         self.func_params += 1
 
     def save_if(self):
+        print("save iffffffffffffffffffff")
+        print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
+        print(self.ss)
+        print(self.pid_scope_stack)
         self.program_block.add_instruction("", empty=True)
     
     def jpf(self):
+        print("jpfffffffffffffffffffffff")
+        print("save iffffffffffffffffffff")
+        print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
+        print(self.ss)
+        print(self.pid_scope_stack)
         self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
@@ -786,6 +797,11 @@ class CodeGenerator:
                                                                                 ),i = self.program_block.pc_stack.pop())
     
     def jpf_save(self):
+        print("save would yaffffffffffffffffffffff")
+        print("save iffffffffffffffffffff")
+        print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
+        print(self.ss)
+        print(self.pid_scope_stack)
         self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
@@ -794,14 +810,17 @@ class CodeGenerator:
                                                                         [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                          ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE)]
                                                                                 ),i = self.program_block.pc_stack.pop())
-        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
         #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         self.program_block.add_instruction("", empty= True)
     
     def jp(self):
-        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        print("save iffffffffffffffffffff")
+        print("this is stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
+        print(self.ss)
+        print(self.pid_scope_stack)
+        print("jppppppppppppppppppppppppppppppp")
         # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
         #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
         #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
