@@ -3,9 +3,12 @@ int funco(int a, int b){
 }
 
 void myfunction(void) {
- 	int c = 5;
- 	int d = 12;
-	int a = funco(c, d); 
+ 	int c;
+ 	int d;
+ 	int a;
+ 	c = 12;
+ 	d = 5;
+	a = c + funco(c, d); 
 }
 
 
