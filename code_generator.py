@@ -9,6 +9,13 @@ class Constants(IntEnum):
 class VariableScope(Enum):
     GLOBAL_VARIABLE = 1
     LOCAL_VARIABLE = 2
+    """
+    Special type a.k.a. TOF SAG
+
+    This means that the variable is stored in the local scope and it is an address
+    to another variable. This address is absolute
+    """
+    ARRAY = 3
 
 class MathOperator(Enum):
     PLUS = 1
@@ -390,7 +397,7 @@ class CodeGenerator:
                         ThreeAddressInstructionOperand(address, ThreeAddressInstructionNumberType.IMMEDIATE),
                         ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                     ]))
-        else:
+        else: # Either array or local variable. Pointers are also stored in local variable so we are fine
             # Add the stack pointer to the register address and boom
             self.program_block.add_instruction(ThreeAddressInstruction(
                     # TEMP_REG = SP + #Address
@@ -398,6 +405,16 @@ class CodeGenerator:
                     [
                         ThreeAddressInstructionOperand(address, ThreeAddressInstructionNumberType.IMMEDIATE),
                         ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                        ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                    ]))
+        
+        if scope == VariableScope.ARRAY:
+            # Now if this is an array, dereference the variable and place the absolute address in register
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                    # [TEMP_REG] = [TEMP_REG]
+                    ThreeAddressInstructionOpcode.ASSIGN,
+                    [
+                        ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                         ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                     ]))
 
@@ -1331,7 +1348,7 @@ class CodeGenerator:
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                 ]))
-        else:
+        elif pid_scope == VariableScope.GLOBAL_VARIABLE:
             # We have a pointer to first element in R2
             self.program_block.add_instruction(ThreeAddressInstruction(
                 # R3 = [R1] + R2 = the address of element
@@ -1341,6 +1358,8 @@ class CodeGenerator:
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                 ]))
+        else:
+            raise Exception("SHASH KHEILI BOZORG")
         # Here, we have the absolute address in of element in R3
         # move it to the temp variable
         self.program_block.add_instruction(ThreeAddressInstruction(
@@ -1352,7 +1371,7 @@ class CodeGenerator:
             ]))
         # Put the result in stack
         self.ss.append(result_address)
-        self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
+        self.pid_scope_stack.append(VariableScope.ARRAY)
 
 
     def pop_expression(self):
