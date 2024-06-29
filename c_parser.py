@@ -1438,6 +1438,7 @@ def Var_call_prime(parent: anytree.Node) :
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
+		print("    called form var call prime   ")
 		code_generator.call()
 		return
 
@@ -1501,6 +1502,7 @@ def Factor_prime(parent: anytree.Node) :
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
+		print("    called form factor prime   ")
 		code_generator.call()
 		return
 
