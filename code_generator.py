@@ -351,9 +351,27 @@ class CodeGenerator:
                                                                 ThreeAddressInstructionOperand(self.rax.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
             self.program_block.add_instruction(
                                 ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                            [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                            [ThreeAddressInstructionOperand(1000000000000,ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                 ThreeAddressInstructionOperand(self.pc.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
+            self.program_block.add_instruction(
+                                ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                            [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                ThreeAddressInstructionOperand(self.sp.pointer - 4,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
+            self.program_block.add_instruction(
+                                ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                            [ThreeAddressInstructionOperand(100000000000000,ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                ThreeAddressInstructionOperand(self.sp.pointer - 8 ,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
+            self.program_block.add_instruction(
+                                ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                            [ThreeAddressInstructionOperand(self.sp.pointer - 12,ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                ThreeAddressInstructionOperand(self.sp.pointer - 12,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
             
+            # self.program_block.add_instruction(ThreeAddressInstruction(
+            #     # PRINT(R2)
+            #     ThreeAddressInstructionOpcode.PRINT,
+            #     [
+            #         ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+            #     ]))
             self.program_block.add_instruction("",empty=True)
            
         # for inst in self.program_block.program_block() :
@@ -490,66 +508,66 @@ class CodeGenerator:
         self.param_leftover = []
         # Sp points to the pc 
         self.sp.pointer -= 8
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(111, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(111, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(8, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
 
         # Save the last pc for later use
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
         self.sp.pointer -= 4
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                                 ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         # Add memory to stack 
         self.sp.pointer -= 100
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
@@ -559,62 +577,89 @@ class CodeGenerator:
 
 
 
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))        
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))        
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
         self.sp.pointer += 4  
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] )) 
               
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         # TODO : Needs to be completed      
-        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-        #                                                                 [ThreeAddressInstructionOperand(return_pc, ThreeAddressInstructionNumberType.IMMEDIATE),
-        #                                                                     ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
-        
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(0, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(87654321, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
         # Skip a block for return value
         self.sp.pointer += 8  
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                                                                            ThreeAddressInstructionOperand(8, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(112, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(0, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
+                                                                        [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                                                                            ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                                ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(0, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(112, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
         print("Shoomb Start +++++++++++++++++++++++++++")
         # Now the stack pointer is pointing at the first local variable
     
@@ -622,12 +667,12 @@ class CodeGenerator:
         "Return value from a fuction"
         print("Start Returnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
         print("nigros return =====", self.ss)
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(222222222, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(222222222, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
        
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
@@ -637,18 +682,18 @@ class CodeGenerator:
         print(self.ss)
         print(self.pid_scope_stack)
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
@@ -657,46 +702,46 @@ class CodeGenerator:
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] )) 
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)] ))
 
         
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
        
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))       
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(333333333, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))       
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(333333333, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
         print("Shoomb Returnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
     def push_param(self) :
         self.func_params += 1
@@ -721,12 +766,12 @@ class CodeGenerator:
             # value in the stack always. But this time, because we have the argument in stack,
             # we do not push anything and thus the Expression-stmt will remove it.
             return
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(55555, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(55555, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
         self.arg_mem.reset()
         fixed_args = []
         
@@ -771,12 +816,12 @@ class CodeGenerator:
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                             ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ), i = self.program_block.pc_stack.pop())        
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(666666, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(666666, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
         print(self.ss)
         print(self.pid_scope_stack)
         # print("sag2",self.pid_scope_stack.pop())
@@ -850,64 +895,64 @@ class CodeGenerator:
         self.semantic_analyzer.exit_scope()
         self.sp.pointer -= 4
         
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(14141, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(14141, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
         # Put the return value in EAX register
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
         
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
 
         self.sp.pointer -= 8
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.SUB,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(8, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
 
         # Remove the stack block   
         self.sp.pointer += 100
@@ -916,12 +961,12 @@ class CodeGenerator:
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] )) 
         
 
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
 
         self.sp.pointer += 4 
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
@@ -929,62 +974,62 @@ class CodeGenerator:
                                                                             ThreeAddressInstructionOperand(4, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
 
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(718718718, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(718718718, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
         
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #         ]))
 
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                                 ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         print("POINtork ",self.sp.pointer)
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ADD,
                                                                         [ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(8, ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                                 ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.sp.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
                                                                         [ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS)])) 
         print("Shoomb End -------------------")
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(15151, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(15151, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
     def pop_int_type(self):
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
@@ -1096,18 +1141,18 @@ class CodeGenerator:
         self.find_absolute_address(src_address, src_scope, self.temp_registers.TEMP_R1)
         self.find_absolute_address(dst_address, dst_scope, self.temp_registers.TEMP_R2)
         # [R2] = [R1]
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(987654, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
-        self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(987654, ThreeAddressInstructionNumberType.IMMEDIATE),
+        #         ]))
+        # self.program_block.add_instruction(ThreeAddressInstruction(
+        #         # PRINT(R2)
+        #         ThreeAddressInstructionOpcode.PRINT,
+        #         [
+        #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+        #         ]))
         
         # self.program_block.add_instruction(ThreeAddressInstruction(
         #         # PRINT(R2)

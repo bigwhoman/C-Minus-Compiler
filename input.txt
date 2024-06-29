@@ -1,9 +1,19 @@
-int pedar() {
-	return 1;
+int h;
+int fibo(int a) {
+	int k;
+	k = h + a * b;
+	return k;
 }
 
 void main(void) {
+    int a;
+    int b;
     int c;
-    c = pedar();
-    output(c);
+    int d;
+    a = 2;
+    b = 5;
+    h = 12;
+    d = 10;
+    pedar(a+b);
+    output(a);
 }
