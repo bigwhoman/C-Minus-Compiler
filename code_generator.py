@@ -121,12 +121,21 @@ class SemanticAnalyzer:
         # A stack which each entry contains a list of variables in a scope
         self.scope_stack: list[list[SymbolTableEntry]] = [[]]
         self.error_list: list[str] = []
+        # A list which each entry is a list of break statements in each scope.
+        # Each entry represents a nested for loop. We break always breaks the inner loop.
+        self.break_addresses: list[list[int]] = []
 
     def enter_scope(self):
         self.scope_stack.append([])
     
     def exit_scope(self):
         self.scope_stack.pop()
+
+    def enter_for(self):
+        self.break_addresses.append([])
+    
+    def exit_for(self):
+        self.break_addresses.pop()
 
     def get_entry(self, lexeme: str) -> Union[SymbolTableEntry, None]:
         """
@@ -1417,3 +1426,122 @@ class CodeGenerator:
         """
         self.ss.pop()
         self.pid_scope_stack.pop()
+
+    def for_condition_start(self):
+        """
+        This method is called just before reaching the expression of the condition.
+
+        We just need to save the address of here in the stack in order to return to here later inside the loop
+        function.
+        """
+        self.ss.append(self.program_block.get_pc())
+
+    def for_condition_end(self):
+        """
+        This method is called at the very end of the evolution of each for loop.
+        Just after the PC, we should do two empty instructions. One which checks if the expression is false and jumps
+        to the end of the loop and the other is a always jump to just after the step expression.
+        """
+        # First, get the result address
+        result_address = self.ss.pop()
+        result_scope = self.pid_scope_stack.pop()
+        # Generate the instruction to load the result in stack.
+        # We put it in R1 because why not.
+        self.find_absolute_address(result_address, result_scope, self.temp_registers.TEMP_R1)
+        # Two instructions for backpactching
+        self.ss.append(self.program_block.get_pc()) # for jpf
+        self.program_block.add_instruction(None, empty=True)
+        self.ss.append(self.program_block.get_pc()) # for jmp to the loop
+        self.program_block.add_instruction(None, empty=True)
+
+    def for_step_begin(self):
+        """
+        Just before the expression of a step of for loop. We simply store the address for the jump at the end of the loop.
+        """
+        self.ss.append(self.program_block.get_pc())
+    
+    def for_step_end(self):
+        """
+        In runtime, just after the step ends, we should jump to the condition. So we dont need backpatching.
+        We have the address of the jump in the 4th element of stack. The stack is like this:
+
+        for step begin address
+        jmp to loop body (backpatch needed)
+        jmp to end if the condition is false (backpatch needed)
+        condition check begin address
+        """
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            ThreeAddressInstructionOpcode.JP,
+            [
+                ThreeAddressInstructionOperand(self.ss[-4], ThreeAddressInstructionNumberType.DIRECT_ADDRESS)
+            ]
+        ))
+
+    def for_body_begin(self):
+        """
+        Just when the for body begins, we can backpatch the address of jmp to loop body which is in ss[-2]
+        """
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            ThreeAddressInstructionOpcode.JP,
+            [
+                ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.DIRECT_ADDRESS)
+            ]
+        ), i = self.ss[-2])
+        # For the break statements
+        self.semantic_analyzer.enter_for()
+
+    def for_body_end(self):
+        """
+        The end of the line!
+        We have three tasks to do:
+        1. Insert a jump to step instruction here
+        2. Backpatch the jmp to end if the condition is false
+        3. Backpatch every break instruction to here
+
+        Stack is like this:
+        for step begin address
+        jmp to loop body (slate, not needed)
+        jmp to end if the condition is false (backpatch needed)
+        condition check begin address (slate, not needed)
+        """
+        # Task 1: Add a jump to condition
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            ThreeAddressInstructionOpcode.JP,
+            [
+                ThreeAddressInstructionOperand(self.ss[-1], ThreeAddressInstructionNumberType.DIRECT_ADDRESS)
+            ]
+        ))
+        # Task 2: Backpatch the jump
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            ThreeAddressInstructionOpcode.JP,
+            [
+                ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.DIRECT_ADDRESS)
+            ]
+        ), i = self.ss[-3])
+        # Task 3: Backpatch break statements
+        for break_address in self.semantic_analyzer.break_addresses[-1]:
+            self.program_block.add_instruction(ThreeAddressInstruction(
+            ThreeAddressInstructionOpcode.JP,
+            [
+                ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.DIRECT_ADDRESS)
+            ]
+        ), i = break_address)
+        # Cleanup
+        for _ in range(4):
+            self.ss.pop()
+        self.semantic_analyzer.exit_for()
+    
+    def break_action(self):
+        """
+        In break, we simply just put a empty instruction be backpatched later. We add the address to the semantic
+        analyzer to backpatch them all later when the loop ends.
+
+        We should also check for dangling breaks.
+        """
+        # Check if this is a dangling break
+        if len(self.semantic_analyzer.break_addresses) == 0:
+            self.semantic_analyzer.error_list.append(f"{self.scanner.line_number}: Semantic Error! No 'while' found for 'break'")
+            return
+        # Add this pc to list and add a hole
+        self.semantic_analyzer.break_addresses[-1].append(self.program_block.get_pc())
+        self.program_block.add_instruction(None, empty=True)
