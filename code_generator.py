@@ -1513,9 +1513,11 @@ class CodeGenerator:
         ))
         # Task 2: Backpatch the jump
         self.program_block.add_instruction(ThreeAddressInstruction(
-            ThreeAddressInstructionOpcode.JP,
+            ThreeAddressInstructionOpcode.JPF,
             [
-                ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.DIRECT_ADDRESS)
+                # I used R1 in the line before
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
             ]
         ), i = self.ss[-3])
         # Task 3: Backpatch break statements
