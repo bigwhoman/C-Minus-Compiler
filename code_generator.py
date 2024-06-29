@@ -763,6 +763,43 @@ class CodeGenerator:
     def push_param(self) :
         self.func_params += 1
 
+    def save_if(self):
+        self.program_block.add_instruction("", empty=True)
+    
+    def jpf(self):
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+        #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JPF,
+                                                                        [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                                                                         ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE)]
+                                                                                ),i = self.program_block.pc_stack.pop())
+    
+    def jpf_save(self):
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+        #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JPF,
+                                                                        [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                                                                         ThreeAddressInstructionOperand(self.program_block.get_pc() + 1, ThreeAddressInstructionNumberType.IMMEDIATE)]
+                                                                                ),i = self.program_block.pc_stack.pop())
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+        #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        self.program_block.add_instruction("", empty= True)
+    
+    def jp(self):
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
+        # self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+        #                                                                 [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+        #                                                                     ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE)]
+                                                                                ),i = self.program_block.pc_stack.pop())
+
     def call(self):
         print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         print(self.ss)
