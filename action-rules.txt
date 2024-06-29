@@ -28,9 +28,10 @@ Statement -> Return-stmt
 Expression-stmt -> Expression ; #pop_expression -> pop one to remove the statement result from stack
 Expression-stmt -> break ; #break
 Expression-stmt -> ;
-Selection-stmt -> if ( Expression ) Statement Else-stmt
-Else-stmt -> endif
-Else-stmt -> else Statement endif
+Selection-stmt -> if ( Expression ) #save_if Statement Else-stmt
+Else-stmt -> endif #jpf
+Else-stmt -> else #jpf_save Statement endif #jp
+Iteration-stmt -> for (Expression; Expression; Expression) Statement
 Iteration-stmt -> for (Expression #pop_expression; #for_condition_start Expression #for_condition_end; #for_step_begin Expression #pop_expression #for_step_end) #for_body_begin Statement #for_end
 Return-stmt -> return Return-stmt-prime
 Return-stmt-prime -> ; | Expression #return_func ;

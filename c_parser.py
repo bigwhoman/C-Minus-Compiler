@@ -621,6 +621,7 @@ def Selection_stmt(parent: anytree.Node) :
 		Match('(', current_node)
 		Expression(current_node)
 		Match(')', current_node)
+		code_generator.save_if()
 		Statement(current_node)
 		Else_stmt(current_node)
 		return
@@ -653,12 +654,15 @@ def Else_stmt(parent: anytree.Node) :
 
 	if lookahead in ['endif'] :
 		Match('endif', current_node)
+		code_generator.jpf()
 		return
 
 	if lookahead in ['else'] :
 		Match('else', current_node)
+		code_generator.jpf_save()
 		Statement(current_node)
 		Match('endif', current_node)
+		code_generator.jp()
 		return
 
     
@@ -1448,6 +1452,7 @@ def Var_call_prime(parent: anytree.Node) :
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
+		print("    called form var call prime   ")
 		code_generator.call()
 		return
 
@@ -1511,6 +1516,7 @@ def Factor_prime(parent: anytree.Node) :
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
+		print("    called form factor prime   ")
 		code_generator.call()
 		return
 
