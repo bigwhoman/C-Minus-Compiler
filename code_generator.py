@@ -226,18 +226,24 @@ class SemanticAnalyzer:
 class ProgramBlock:
     def __init__(self):
         self.program_block: list[ThreeAddressInstruction] = []
-        self.pc = 1
+        self.pc = 0
+        self.pc_stack = []
 
     def add_instruction(self,ThreeAddressInstruction, i=None, empty=None):
         if empty != None :
+            print("Chopi ", self.pc)
+            self.pc_stack.append(self.pc)
             self.pc += 1
+            self.program_block.append("empty")
             return 
-        print(self.pc, ThreeAddressInstruction)
         # Add instruction to program block 
+        
         if i == None :
+            print(self.pc, ThreeAddressInstruction)
             self.program_block.append(ThreeAddressInstruction)
             self.pc += 1
         else :
+            print("back patch ----> ",i, ThreeAddressInstruction)
             self.program_block[i] = ThreeAddressInstruction
         
     def dump(self):
@@ -348,7 +354,8 @@ class CodeGenerator:
                                                             [ThreeAddressInstructionOperand(0,ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                 ThreeAddressInstructionOperand(self.pc.address,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
            
-    
+        # for inst in self.program_block.program_block() :
+        #     print(inst)
     def find_absolute_address(self, address: int, scope: VariableScope, temp_register: int):
         """
         This function is intended to generate runtime code to move the address of a variable to
@@ -564,11 +571,20 @@ class CodeGenerator:
         #                                                                 ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))            
 
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
-                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 2, ThreeAddressInstructionNumberType.IMMEDIATE),
-                                                                            ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc() + 3, ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ), empty=True)
         
+        self.find_absolute_address(self.ss.pop(), self.pid_scope_stack.pop(), self.temp_registers.TEMP_R1)
         self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
-                                                                        [ThreeAddressInstructionOperand(self.ss.pop(), ThreeAddressInstructionNumberType.IMMEDIATE)]  ))        
+                                                                        [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]  ))
+
+
+        self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
+                                                                        [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE),
+                                                                            ThreeAddressInstructionOperand(self.pc.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ), i = self.program_block.pc_stack.pop())        
+        
+        print(self.ss)
+        print(self.pid_scope_stack)
         # print("sag2",self.pid_scope_stack.pop())
         self.arg_num = 0
         print("Shoomb Call aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

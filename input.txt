@@ -1,9 +1,14 @@
-void main(void) {
-	int a;
-    int b;
+int pedar( int a, int b) {
+	return a + b;
+}
 
+void main(void) {
+    int a;
+    int b;
+    int c;
     a = 1;
     b = 2;
+    c = pedar(a,b);
     output(a);
     output(b);
 }

@@ -1,4 +1,4 @@
-Program -> Declaration-list
+Program -> Declaration-list #create_program
 Declaration-list -> Declaration Declaration-list  
 Declaration-list -> '' 
 Declaration -> Declaration-initial Declaration-prime
