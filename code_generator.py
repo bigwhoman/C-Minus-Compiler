@@ -405,7 +405,7 @@ class CodeGenerator:
 
     def array_size(self):
         assert self.scanner.lookahead_token[0] == scanner.TokenType.NUM
-        self.ss.append(self.scanner.lookahead_token[1])
+        self.ss.append(int(self.scanner.lookahead_token[1]))
 
     def array_declared(self):
         assert self.declaring_pid_value != None
@@ -415,7 +415,10 @@ class CodeGenerator:
         if self.ss[-1] == int(Constants.INT_TYPE):
             self.semantic_analyzer.declare_array(self.declaring_pid_value, size_of_array)
             if len(self.semantic_analyzer.scope_stack) == 1: # is this a global variable?
-                raise Exception("TODO")
+                # In case of global variable array we should just increase the number of global variables
+                # by size of array
+                self.semantic_analyzer.get_entry(self.declaring_pid_value).address = self.FIRST_GLOBAL_VARIABLE_ADDRESS + self.declared_global_variables * 4
+                self.declared_global_variables += size_of_array
         elif self.ss[-1] == int(Constants.VOID_TYPE):
             self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Illegal type of void for '{self.declaring_pid_value}'")
         else:
@@ -847,7 +850,59 @@ class CodeGenerator:
         self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
 
     def array(self):
-        pass
+        """
+        Array is used just after [EXP]. This means that the result of expression (the array index)
+        is in the top of stack and just before it is the address of the array itself.
+
+        In this case we should get find the absolute address of array and put the index to it
+        in the ss.
+        """
+        index_address = self.ss.pop()
+        index_scope = self.pid_scope_stack.pop()
+        pid_address = self.ss.pop()
+        pid_scope = self.pid_scope_stack.pop()
+        result_address = self.semantic_analyzer.get_temp()
+        # Move the address of index to temp registers
+        self.find_absolute_address(index_address, index_scope, self.temp_registers.TEMP_R1)
+        # This line has two outcomes, either it puts the address of array pointer in the R2 if this is local variable
+        # OR it puts the address of first element in the R2 if this is a global variable
+        self.find_absolute_address(pid_address, pid_scope, self.temp_registers.TEMP_R2)
+        # Load the result variable address for later
+        self.find_absolute_address(result_address, VariableScope.LOCAL_VARIABLE, self.temp_registers.TEMP_R4)
+        # Now check if the array is a global array or a local one
+        if pid_scope == VariableScope.LOCAL_VARIABLE:
+            # We have a pointer to the address of array in R2
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                # R3 = [R1] + [R2] = the address of element
+                ThreeAddressInstructionOpcode.ADD,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                ]))
+        else:
+            # We have a pointer to first element in R2
+            self.program_block.add_instruction(ThreeAddressInstruction(
+                # R3 = [R1] + R2 = the address of element
+                ThreeAddressInstructionOpcode.ADD,
+                [
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                ]))
+        # Here, we have the absolute address in of element in R3
+        # move it to the temp variable
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            # [R4] = R1
+            ThreeAddressInstructionOpcode.ASSIGN,
+            [
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R4, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            ]))
+        # Put the result in stack
+        self.ss.append(result_address)
+        self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
+
 
     def pop_expression(self):
         """
@@ -855,4 +910,3 @@ class CodeGenerator:
         """
         self.ss.pop()
         self.pid_scope_stack.pop()
-        print("SIZE", self.pid_scope_stack, self.ss, self.operator_stack)
