@@ -395,6 +395,17 @@ class CodeGenerator:
                                                             [ThreeAddressInstructionOperand(self.sp.pointer - 12,ThreeAddressInstructionNumberType.IMMEDIATE),
                                                                 ThreeAddressInstructionOperand(self.sp.pointer - 12,ThreeAddressInstructionNumberType.DIRECT_ADDRESS)]))
             
+            self.current_global_array_assigner = self.program_block.get_pc()
+            for _ in range(100):
+                self.program_block.add_instruction(ThreeAddressInstruction(
+                    ThreeAddressInstructionOpcode.ADD,
+                    [
+                        # Same as NOP
+                        ThreeAddressInstructionOperand(100, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                        ThreeAddressInstructionOperand(0, ThreeAddressInstructionNumberType.IMMEDIATE),
+                        ThreeAddressInstructionOperand(100,ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                    ]))
+            
             # self.program_block.add_instruction(ThreeAddressInstruction(
             #     # PRINT(R2)
             #     ThreeAddressInstructionOpcode.PRINT,
@@ -508,7 +519,16 @@ class CodeGenerator:
                 # In case of global variable array we should just increase the number of global variables
                 # by size of array
                 self.semantic_analyzer.get_entry(self.declaring_pid_value).address = self.FIRST_GLOBAL_VARIABLE_ADDRESS + self.declared_global_variables * 4
-                self.declared_global_variables += size_of_array
+                self.declared_global_variables += size_of_array + 1
+                self.program_block.add_instruction(
+                    ThreeAddressInstruction(
+                        ThreeAddressInstructionOpcode.ASSIGN,
+                        [
+                            ThreeAddressInstructionOperand(self.semantic_analyzer.get_entry(self.declaring_pid_value).address + 4, ThreeAddressInstructionNumberType.IMMEDIATE),
+                            ThreeAddressInstructionOperand(self.semantic_analyzer.get_entry(self.declaring_pid_value).address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                        ]), i = self.current_global_array_assigner)
+                print("SHASH IN ", self.current_global_array_assigner)
+                self.current_global_array_assigner += 1
         elif self.ss[-1] == int(Constants.VOID_TYPE):
             self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Illegal type of void for '{self.declaring_pid_value}'")
         else:
@@ -916,7 +936,7 @@ class CodeGenerator:
         print(self.ss)
         print(self.pid_scope_stack)
         for i in range(self.arg_nums[-1]) : 
-            self.find_absolute_address(fixed_args[len(fixed_args) - 1 - i][0], fixed_args[len(fixed_args) - 1 - i][0], self.temp_registers.TEMP_R1)
+            self.find_absolute_address(fixed_args[len(fixed_args) - 1 - i][0], fixed_args[len(fixed_args) - 1 - i][1], self.temp_registers.TEMP_R1)
             self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                                                                             ThreeAddressInstructionOperand(self.rax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS)] ))
@@ -1512,28 +1532,14 @@ class CodeGenerator:
         # Load the result variable address for later
         self.find_absolute_address(result_address, VariableScope.LOCAL_VARIABLE, self.temp_registers.TEMP_R4)
         # Now check if the array is a global array or a local one
-        if pid_scope == VariableScope.LOCAL_VARIABLE:
-            # We have a pointer to the address of array in R2
-            self.program_block.add_instruction(ThreeAddressInstruction(
-                # R3 = [R1] + [R2] = the address of element
-                ThreeAddressInstructionOpcode.ADD,
-                [
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        elif pid_scope == VariableScope.GLOBAL_VARIABLE:
-            # We have a pointer to first element in R2
-            self.program_block.add_instruction(ThreeAddressInstruction(
-                # R3 = [R1] + R2 = the address of element
-                ThreeAddressInstructionOpcode.ADD,
-                [
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                    ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-                ]))
-        else:
-            raise Exception("SHASH KHEILI BOZORG")
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            # R3 = [R1] + [R2] = the address of element
+            ThreeAddressInstructionOpcode.ADD,
+            [
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+            ]))
         # Here, we have the absolute address in of element in R3
         # move it to the temp variable
         self.program_block.add_instruction(ThreeAddressInstruction(
