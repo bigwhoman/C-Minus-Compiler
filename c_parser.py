@@ -466,11 +466,13 @@ def Compound_stmt(parent: anytree.Node) :
 
 
 	if lookahead in ['{'] :
+		code_generator.scope_start()
 		Match('{', current_node)
 		Declaration_list(current_node)
 		code_generator.variables_declared()
 		Statement_list(current_node)
 		Match('}', current_node)
+		code_generator.scope_end()
 		return
 
     

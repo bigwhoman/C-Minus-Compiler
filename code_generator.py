@@ -132,6 +132,7 @@ class SemanticAnalyzer:
     def __init__(self):
         # A stack which each entry contains a list of variables in a scope
         self.has_error = False
+        self.virtual_scopes: list[int] = []
         self.scope_stack: list[list[SymbolTableEntry]] = [[SymbolTableEntry("output", VariableType.VOID_FUNCTION, [VariableType.INT])]]
         self.error_list: list[str] = []
         # A list which each entry is a list of break statements in each scope.
@@ -152,6 +153,13 @@ class SemanticAnalyzer:
     
     def exit_for(self):
         self.break_addresses.pop()
+
+    def enter_virtual_scope(self):
+        self.virtual_scopes.append(len(self.scope_stack[-1]))
+    
+    def exit_virual_scope(self):
+        self.scope_stack[-1] = self.scope_stack[-1][:self.virtual_scopes[-1]]
+        self.virtual_scopes.pop()
 
     def get_entry(self, lexeme: str) -> Union[SymbolTableEntry, None]:
         """
@@ -1320,6 +1328,12 @@ class CodeGenerator:
         print(self.pid_scope_stack)
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
 
+    def scope_start(self):
+        """
+        Please let the suffering end
+        """
+        self.semantic_analyzer.enter_virtual_scope()
+
     def variables_declared(self):
         """
         When the statement of a function is being parsed, after the very first of it, we have declared every
@@ -1352,6 +1366,9 @@ class CodeGenerator:
                         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ]))
         print("DECLARING VARS END")
+
+    def scope_end(self):
+        self.semantic_analyzer.exit_virual_scope()
 
     def pid(self):
         """
