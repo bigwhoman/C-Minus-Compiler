@@ -1,9 +1,12 @@
 #!/bin/bash
-for test in testcases-phase3/T*; do
+for test in testcases-phase3/S*; do
+    rm input.txt expected.txt semantic_errors.txt stdout.txt output.txt
     echo "RUNNING TEST $test"
     cp "$test/input.txt" input.txt
     python3 compiler.py > /dev/null
-    ./tester_linux.out > stdout.txt 2> /dev/null
+    if [ "The input program is semantically correct." == "$(cat semantic_errors.txt)" ]; then
+        ./tester_linux.out > stdout.txt 2> /dev/null
+    fi
     sed -i '$ d' stdout.txt # remove bytes used
     diff --strip-trailing-cr <(sed -e '$a\' "$test/expected.txt") <(sed -e '$a\' stdout.txt)
     stdout_exit_code=$?

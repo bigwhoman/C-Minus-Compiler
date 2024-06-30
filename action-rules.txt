@@ -5,8 +5,8 @@ Declaration -> Declaration-initial Declaration-prime
 Declaration-initial -> Type-specifier #declaring_pid ID
 Declaration-prime -> Fun-declaration-prime 
 Declaration-prime -> Var-declaration-prime
-Var-declaration-prime -> ; #variable_declared
-Var-declaration-prime -> [ #array_size NUM ] ; #array_declared
+Var-declaration-prime -> #variable_declared ;
+Var-declaration-prime -> [ #array_size NUM ] #array_declared ;
 Fun-declaration-prime -> #function_start ( Params ) #function_params_end Compound-stmt #function_end
 Type-specifier -> int #int_type
 Type-specifier -> void #void_type

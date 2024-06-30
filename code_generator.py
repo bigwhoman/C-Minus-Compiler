@@ -506,7 +506,7 @@ class CodeGenerator:
                 self.semantic_analyzer.get_entry(self.declaring_pid_value).address = self.FIRST_GLOBAL_VARIABLE_ADDRESS + self.declared_global_variables * 4
                 self.declared_global_variables += 1
         elif self.ss[-1] == int(Constants.VOID_TYPE):
-            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Illegal type of void for '{self.declaring_pid_value}'")
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Illegal type of void for '{self.declaring_pid_value}'.")
         else:
             raise Exception("RIDEMAN BOZORG")
         # Empty stack
@@ -552,7 +552,7 @@ class CodeGenerator:
                 print("SHASH IN ", self.current_global_array_assigner)
                 self.current_global_array_assigner += 1
         elif self.ss[-1] == int(Constants.VOID_TYPE):
-            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Illegal type of void for '{self.declaring_pid_value}'")
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Illegal type of void for '{self.declaring_pid_value}'.")
         else:
             raise Exception("RIDEMAN BOZORG")
         # Empty stack
@@ -947,8 +947,22 @@ class CodeGenerator:
         #         ]))
         self.arg_mem.reset()
         fixed_args = []
-        if self.arg_nums != len(self.semantic_analyzer.function_list[self.call_stack[-1]][1]) :
-            print(f"Semantic Error! Mismatch in numbers of arguments of '{self.call_stack[-1]}'.")
+        print("ARG CHECKING:", self.arg_nums[-1], self.semantic_analyzer.function_list[self.call_stack[-1]][1])
+        expected_argument = len(self.semantic_analyzer.function_list[self.call_stack[-1]][1])
+        if self.arg_nums[-1] != expected_argument:
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in numbers of arguments of '{self.call_stack[-1]}'.")
+            # Fix the ss and actually create the call
+            if self.arg_nums[-1] > expected_argument: # remove from stack
+                for _ in range(self.arg_nums[-1] - expected_argument):
+                    self.ss.pop()
+                    self.pid_scope_stack.pop()
+            if self.arg_nums[-1] < expected_argument: # add to stack
+                for _ in range(expected_argument - self.arg_nums[-1]):
+                    self.ss.append(0)
+                    self.pid_scope_stack.append(VariableScope.GLOBAL_VARIABLE)
+            # Continue to generate code
+            self.arg_nums[-1] = expected_argument
+
         for i in range(self.arg_nums[-1]) :
             print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
             print(self.ss)
@@ -1042,7 +1056,8 @@ class CodeGenerator:
                                                 function_list[self.call_stack[-1]][1]
         print(len(func_args))
         if self.arg_nums[-1] >= len(func_args) :
-            print("Inconsistant Number -------------------------------")
+            print("Inconsistant Number -------------------------------", self.arg_nums[-1], len(func_args))
+            self.arg_nums[-1] += 1
             return 
         arg_addr = self.ss[-1]
         arg_type = self.pid_scope_stack[-1]
@@ -1056,7 +1071,7 @@ class CodeGenerator:
                     print(self.semantic_analyzer.scope_stack[0])
                     print("Global +++++++++++++++++++++++++++++++++++++++++")
                     if variable.var_type != wanted_type :
-                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
+                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
         else : 
             for variable in self.semantic_analyzer.scope_stack[1] :
                 if variable.address == arg_addr :
@@ -1064,7 +1079,7 @@ class CodeGenerator:
                     print(self.semantic_analyzer.scope_stack[1])
                     print("Local -----------------------------------------------")
                     if variable.var_type != wanted_type :
-                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
+                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
         self.arg_nums[-1] += 1
         print(self.ss)
         print(self.pid_scope_stack)
@@ -1317,7 +1332,10 @@ class CodeGenerator:
         # Get the entry from semantic analyzer
         variable = self.semantic_analyzer.get_entry(self.scanner.lookahead_token[1])
         if variable == None:
-            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! '{self.scanner.lookahead_token[1]}' is not defined")
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! '{self.scanner.lookahead_token[1]}' is not defined.")
+            # FIX: add something random to stack in order to maintain the ss schema
+            self.pid_scope_stack.append(VariableScope.GLOBAL_VARIABLE)
+            self.ss.append(0)
             return
         # Get the address of variable
         global_variable = self.semantic_analyzer.is_global_variable(self.scanner.lookahead_token[1])
@@ -1736,7 +1754,7 @@ class CodeGenerator:
         """
         # Check if this is a dangling break
         if len(self.semantic_analyzer.break_addresses) == 0:
-            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! No 'while' found for 'break'")
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! No 'while' found for 'break'")
             return
         # Add this pc to list and add a hole
         self.semantic_analyzer.break_addresses[-1].append(self.program_block.get_pc())

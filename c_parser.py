@@ -206,8 +206,8 @@ def Var_declaration_prime(parent: anytree.Node) :
 
 
 	if lookahead in [';'] :
-		Match(';', current_node)
 		code_generator.variable_declared()
+		Match(';', current_node)
 		return
 
 	if lookahead in ['['] :
@@ -215,8 +215,8 @@ def Var_declaration_prime(parent: anytree.Node) :
 		code_generator.array_size()
 		Match('NUM', current_node)
 		Match(']', current_node)
-		Match(';', current_node)
 		code_generator.array_declared()
+		Match(';', current_node)
 		return
 
 	if lookahead in [']', ')', ',', 'endif', 'else', '=', '<', '==', '*'] :
