@@ -954,8 +954,18 @@ class CodeGenerator:
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
         print(self.pid_scope_stack)
-        self.ss.append(self.eax.address)
-        self.pid_scope_stack.append(VariableScope.GLOBAL_VARIABLE)
+        # Get a temp to put the eax into it
+        return_variable_local = self.semantic_analyzer.get_temp()
+        self.find_absolute_address(return_variable_local, VariableScope.LOCAL_VARIABLE, self.temp_registers.TEMP_R1)
+        self.program_block.add_instruction(ThreeAddressInstruction(
+            # [R1] = EAX
+            ThreeAddressInstructionOpcode.ASSIGN,
+            [
+                ThreeAddressInstructionOperand(self.eax.address, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
+                ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
+            ]))
+        self.ss.append(return_variable_local)
+        self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
         print(self.ss)
         print(self.pid_scope_stack)
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
