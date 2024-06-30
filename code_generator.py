@@ -869,6 +869,7 @@ class CodeGenerator:
         print(self.pid_scope_stack)
         if self.is_outputting:
             print("self op")
+            self.arg_num = 0
             self.is_outputting = False
             # Load the address in registers
             self.find_absolute_address(self.ss[-1], self.pid_scope_stack[-1], self.temp_registers.TEMP_R1)
