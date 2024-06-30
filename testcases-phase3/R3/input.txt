@@ -1,7 +1,7 @@
 /* sample 3 recursive */
 
 int count;
-int shash[50];
+int result[50];
 
 
 int f(int a, int result[]) {
@@ -27,10 +27,10 @@ int f(int a, int result[]) {
 void main (void) {
 	int i;
 	for (i = 0; i < 50; i = i + 1){
-		shash[i] = 0;
+		result[i] = 0;
 	}
 	count = 0;
-	output(f(40, shash));
+	output(f(40, result));
 	output(count);
 }
 

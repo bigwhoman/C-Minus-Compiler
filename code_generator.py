@@ -157,41 +157,57 @@ class SemanticAnalyzer:
         """
         Checks if a lexeme has been defined before and returns it if it has
         """
-        for scope in self.scope_stack:
+        for scope in reversed(self.scope_stack):
             for entry in scope:
                 if lexeme == entry.lexeme:
                     return entry
         return None
+    
+    def is_declared_in_current_scope(self, lexeme: str) -> bool:
+        """
+        Checks if a variable is defined in current scope
+        """
+        for entry in self.scope_stack[-1]:
+            if lexeme == entry.lexeme:
+                return True
+        return False
     
     def is_global_variable(self, lexeme: str) -> bool:
         """
         Checks if a variable is a global variable or not.
         It simply checks if it has been declared in the first scope stack or not.
         """
+        # First check if we are shadowing something
+        for scope in self.scope_stack[1:]:
+            for entry in scope:
+                if lexeme == entry.lexeme:
+                    return False
+        # Otherwise check the global scope
         for entry in self.scope_stack[0]:
             if lexeme == entry.lexeme:
                 return True
+        # This means that the variable is not defined?
         return False
 
     def declare_variable(self, name: str):
         """
         Declare a new int variable in the current scope
         """
-        assert not self.get_entry(name)
+        assert not self.is_declared_in_current_scope(name)
         self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT, None))
     
     def declare_array(self, name: str, size: int):
         """
         Declare a new int array in the current scope
         """
-        assert not self.get_entry(name)
+        assert not self.is_declared_in_current_scope(name)
         self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT_ARRAY, size))
 
     def declare_function(self, name: str, return_type: Constants, start_address: int):
         """
         Declare a new int array in the current scope
         """
-        assert not self.get_entry(name)
+        assert not self.is_declared_in_current_scope(name)
         # Convert type on stack to function type
         if return_type == Constants.INT_TYPE:
             function_type = VariableType.INT_FUNCTION

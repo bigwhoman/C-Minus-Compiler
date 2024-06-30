@@ -1,10 +1,11 @@
 #!/bin/bash
-for test in testcases-phase3/S*; do
+for test in testcases-phase3/T*; do
     rm input.txt expected.txt semantic_errors.txt stdout.txt output.txt
     echo "RUNNING TEST $test"
     cp "$test/input.txt" input.txt
     python3 compiler.py > /dev/null
-    if [ "The input program is semantically correct." == "$(cat semantic_errors.txt)" ]; then
+    if [ "The input program is semantically correct." == "$(cat semantic_errors.txt | xargs)" ]; then
+        echo "Running tester..."
         ./tester_linux.out > stdout.txt 2> /dev/null
     fi
     sed -i '$ d' stdout.txt # remove bytes used

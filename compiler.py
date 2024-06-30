@@ -28,7 +28,7 @@ def main():
             semantic_errors.write("\n")
         if len(c_parser.code_generator.semantic_analyzer.error_list) == 0:
             semantic_errors.write("The input program is semantically correct.\n")
-    if len(c_parser.code_generator.semantic_analyzer.error_list) == 0:
+    if len(c_parser.code_generator.semantic_analyzer.error_list) != 0:
         with open("output.txt", "w") as output:
             output.write("The code has not been generated.\n")
 
