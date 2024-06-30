@@ -706,6 +706,7 @@ def Iteration_stmt(parent: anytree.Node) :
 		Expression(current_node)
 		code_generator.pop_expression()
 		code_generator.for_step_end()
+		Match(';', current_node) # TODO: TOF; REMOVE
 		Match(')', current_node)
 		code_generator.for_body_begin()
 		Statement(current_node)

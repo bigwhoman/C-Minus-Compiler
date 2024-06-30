@@ -188,6 +188,24 @@ class SemanticAnalyzer:
                 return True
         # This means that the variable is not defined?
         return False
+    
+    def get_variable_type_by_address(self, address: int, scope: VariableScope) -> VariableType:
+        """
+        Gets the variable type based on the address of the variable
+        """
+        if scope == VariableScope.GLOBAL_VARIABLE:
+            for entry in self.scope_stack[0]:
+                if entry.address == address and entry.var_type in [VariableType.INT, VariableType.INT_ARRAY]:
+                    return entry.var_type
+            if address == 0: # special case: Another semantic error!
+                return VariableType.INT
+            raise Exception("Undefined global variable at address " + str(address))
+        if scope == VariableScope.ARRAY or scope == VariableScope.LOCAL_VARIABLE:
+            for entry in self.scope_stack[1]:
+                if entry.address == address and entry.var_type in [VariableType.INT, VariableType.INT_ARRAY]:
+                    return entry.var_type
+            raise Exception("Undefined local variable at address " + str(address))
+        raise Exception("Shash")
 
     def declare_variable(self, name: str):
         """
@@ -1087,7 +1105,7 @@ class CodeGenerator:
                     print(self.semantic_analyzer.scope_stack[0])
                     print("Global +++++++++++++++++++++++++++++++++++++++++")
                     if variable.var_type != wanted_type :
-                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
+                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in type of argument {self.arg_nums[-1] + 1} of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
         else : 
             for variable in self.semantic_analyzer.scope_stack[1] :
                 if variable.address == arg_addr :
@@ -1095,7 +1113,7 @@ class CodeGenerator:
                     print(self.semantic_analyzer.scope_stack[1])
                     print("Local -----------------------------------------------")
                     if variable.var_type != wanted_type :
-                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
+                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Mismatch in type of argument {self.arg_nums[-1] + 1} of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
         self.arg_nums[-1] += 1
         print(self.ss)
         print(self.pid_scope_stack)
@@ -1404,6 +1422,12 @@ class CodeGenerator:
         # Get the dest
         dst_address = self.ss[-1]
         dst_scope = self.pid_scope_stack[-1]
+
+        # Check if the types are equal
+        src_type = self.semantic_analyzer.get_variable_type_by_address(src_address, src_scope)
+        dst_type = self.semantic_analyzer.get_variable_type_by_address(dst_address, dst_scope)
+        if dst_type != src_type:
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Type mismatch in operands, Got {dst_type} instead of {src_type}.")
         
         # Put the addresses in temp variables
         self.find_absolute_address(src_address, src_scope, self.temp_registers.TEMP_R1)
@@ -1485,25 +1509,6 @@ class CodeGenerator:
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                 ]))
-            
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #     # PRINT(R2)
-            #     ThreeAddressInstructionOpcode.PRINT,
-            #     [
-            #         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-            #     ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #     # PRINT(R2)
-            #     ThreeAddressInstructionOpcode.PRINT,
-            #     [
-            #         ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-            #     ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #     # PRINT(R2)
-            #     ThreeAddressInstructionOpcode.PRINT,
-            #     [
-            #         ThreeAddressInstructionOperand(10000000000000000000000001, ThreeAddressInstructionNumberType.IMMEDIATE),
-            #     ]))
         elif operation == MathOperator.MINUS:
             self.program_block.add_instruction(ThreeAddressInstruction(
                 ThreeAddressInstructionOpcode.SUB,
@@ -1527,43 +1532,7 @@ class CodeGenerator:
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
                     ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-                ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #         # PRINT(R2)
-            #         ThreeAddressInstructionOpcode.PRINT,
-            #         [
-            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-            #         ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #         # PRINT(R2)
-            #         ThreeAddressInstructionOpcode.PRINT,
-            #         [
-            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-            #         ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #         # PRINT(R2)
-            #         ThreeAddressInstructionOpcode.PRINT,
-            #         [
-            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-            #         ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #         # PRINT(R2)
-            #         ThreeAddressInstructionOpcode.PRINT,
-            #         [
-            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R2, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-            #         ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #         # PRINT(R2)
-            #         ThreeAddressInstructionOpcode.PRINT,
-            #         [
-            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
-            #         ]))
-            # self.program_block.add_instruction(ThreeAddressInstruction(
-            #         # PRINT(R2)
-            #         ThreeAddressInstructionOpcode.PRINT,
-            #         [
-            #             ThreeAddressInstructionOperand(self.temp_registers.TEMP_R3, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
-            #         ]))          
+                ]))      
         elif operation == MathOperator.EQUALS:
             self.program_block.add_instruction(ThreeAddressInstruction(
                 ThreeAddressInstructionOpcode.EQ,
@@ -1574,6 +1543,12 @@ class CodeGenerator:
                 ]))
         else:
             raise Exception("SHASH")
+        # Check the types of variables
+        s1_type = self.semantic_analyzer.get_variable_type_by_address(s1_address, s1_scope)
+        s2_type = self.semantic_analyzer.get_variable_type_by_address(s2_address, s2_scope)
+        if s1_type != s2_type:
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! Type mismatch in operands, Got {s1_type} instead of {s2_type}.")
+        
         # Add the result to stack
         self.ss.append(tmp_variable)
         self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
@@ -1770,7 +1745,7 @@ class CodeGenerator:
         """
         # Check if this is a dangling break
         if len(self.semantic_analyzer.break_addresses) == 0:
-            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! No 'while' found for 'break'")
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number} : Semantic Error! No 'for' found for 'break'.")
             return
         # Add this pc to list and add a hole
         self.semantic_analyzer.break_addresses[-1].append(self.program_block.get_pc())
