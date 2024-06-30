@@ -250,10 +250,11 @@ class ProgramBlock:
         self.pc += 1
         self.program_block.append("Return Empty")
         return
-    def add_instruction(self,ThreeAddressInstruction, i=None, empty=None):
+    def add_instruction(self,ThreeAddressInstruction, i=None, empty=None, add_to_stack: bool = True):
         if empty != None :
             print("Chopi ", self.pc)
-            self.pc_stack.append(self.pc)
+            if add_to_stack:
+                self.pc_stack.append(self.pc)
             self.pc += 1
             self.program_block.append("empty")
             return 
@@ -1555,9 +1556,9 @@ class CodeGenerator:
         self.find_absolute_address(result_address, result_scope, self.temp_registers.TEMP_R1)
         # Two instructions for backpactching
         self.ss.append(self.program_block.get_pc()) # for jpf
-        self.program_block.add_instruction(None, empty=True)
+        self.program_block.add_instruction(None, empty=True, add_to_stack=False)
         self.ss.append(self.program_block.get_pc()) # for jmp to the loop
-        self.program_block.add_instruction(None, empty=True)
+        self.program_block.add_instruction(None, empty=True, add_to_stack=False)
 
     def for_step_begin(self):
         """
@@ -1626,6 +1627,7 @@ class CodeGenerator:
             ]
         ), i = self.ss[-3])
         # Task 3: Backpatch break statements
+        print("BREAK ADDRESSES:", self.semantic_analyzer.break_addresses[-1])
         for break_address in self.semantic_analyzer.break_addresses[-1]:
             self.program_block.add_instruction(ThreeAddressInstruction(
             ThreeAddressInstructionOpcode.JP,
@@ -1651,4 +1653,4 @@ class CodeGenerator:
             return
         # Add this pc to list and add a hole
         self.semantic_analyzer.break_addresses[-1].append(self.program_block.get_pc())
-        self.program_block.add_instruction(None, empty=True)
+        self.program_block.add_instruction(None, empty=True, add_to_stack=False)

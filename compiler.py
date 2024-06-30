@@ -22,6 +22,12 @@ def main():
     except SyntaxError as e: # TODO: use something else. For example self made class
         pass # Unexpected EOF
     c_parser.code_generator.program_block.dump()
+    with open("semantic_errors.txt", "w") as semantic_errors:
+        for error in c_parser.code_generator.semantic_analyzer.error_list:
+            semantic_errors.write(error)
+            semantic_errors.write("\n")
+        else:
+            semantic_errors.write("The input program is semantically correct.\n")
 
 if __name__ == "__main__":
     main()
