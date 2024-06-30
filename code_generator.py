@@ -873,12 +873,6 @@ class CodeGenerator:
             self.is_outputting = False
             # Load the address in registers
             self.find_absolute_address(self.ss[-1], self.pid_scope_stack[-1], self.temp_registers.TEMP_R1)
-            self.program_block.add_instruction(ThreeAddressInstruction(
-                # PRINT(R2)
-                ThreeAddressInstructionOpcode.PRINT,
-                [
-                    ThreeAddressInstructionOperand(999999999999999, ThreeAddressInstructionNumberType.IMMEDIATE),
-                ]))
                   
             self.program_block.add_instruction(ThreeAddressInstruction(
                 # PRINT(R2)
