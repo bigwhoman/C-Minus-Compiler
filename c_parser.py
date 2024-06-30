@@ -17,6 +17,7 @@ def Match(expected_token : str, parent: anytree.Node) :
         lookahead = get_next_token()
     elif expected_token != "$" : # Tof sag. Must be like this to pass test 4
         parser_errors.append(f"#{get_current_line()} : syntax error, missing {expected_token}")
+        lookahead = get_next_token() # TOF
 
 def S(parent: anytree.Node) :
 	global lookahead
@@ -708,7 +709,6 @@ def Iteration_stmt(parent: anytree.Node) :
 		Expression(current_node)
 		code_generator.pop_expression()
 		code_generator.for_step_end()
-		Match(';', current_node) # TODO: TOF; REMOVE
 		Match(')', current_node)
 		code_generator.for_body_begin()
 		Statement(current_node)
