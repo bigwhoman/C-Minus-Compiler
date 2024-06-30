@@ -120,6 +120,7 @@ class ThreeAddressInstruction:
 class SemanticAnalyzer:
     def __init__(self):
         # A stack which each entry contains a list of variables in a scope
+        self.has_error = False
         self.scope_stack: list[list[SymbolTableEntry]] = [[]]
         self.error_list: list[str] = []
         # A list which each entry is a list of break statements in each scope.
@@ -246,6 +247,7 @@ class ProgramBlock:
         self.pc = 0
         self.pc_stack = []
         self.return_stack = []
+        self.has_error
     def add_return(self):
         self.return_stack.append(self.pc)
         self.pc += 1
@@ -271,8 +273,11 @@ class ProgramBlock:
         
     def dump(self):
         with open("output.txt", "w") as code:
-            for i, block in enumerate(self.program_block):
-                code.write(f"{i}\t{block}\n")
+            if self.has_error :
+                code.write("The code has not been generated.")
+            else : 
+                for i, block in enumerate(self.program_block):
+                    code.write(f"{i}\t{block}\n")
     
     def get_pc(self) -> int :
         return self.pc
@@ -435,6 +440,9 @@ class CodeGenerator:
                         ThreeAddressInstructionOperand(temp_register, ThreeAddressInstructionNumberType.DIRECT_ADDRESS),
                     ]))
 
+
+    def check_error(self):
+        self.program_block.has_error = self.semantic_analyzer.has_error
 
     def int_type(self):
         self.ss.append(int(Constants.INT_TYPE))

@@ -49,6 +49,7 @@ def Program(parent: anytree.Node) :
     
 	if lookahead in ['$', 'int', 'void'] :
 		Declaration_list(current_node)
+		code_generator.check_error()
 		return
 
 	if lookahead in ['ID', ';', '[', 'NUM', ']', '(', ')', ',', '{', '}', 'break', 'if', 'endif', 'else', 'for', 'return', '=', '<', '==', '+', '-', '*'] :
