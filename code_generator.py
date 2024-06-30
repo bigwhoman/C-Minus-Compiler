@@ -706,7 +706,6 @@ class CodeGenerator:
     def return_func(self) : 
         "Return value from a fuction"
         print("Start Returnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
-        print("nigros return =====", self.ss)
         # self.program_block.add_instruction(ThreeAddressInstruction(
         #         # PRINT(R2)
         #         ThreeAddressInstructionOpcode.PRINT,
