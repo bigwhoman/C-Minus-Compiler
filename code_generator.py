@@ -35,6 +35,17 @@ class VariableType(Enum):
     VOID_FUNCTION = 3
     INT_FUNCTION = 4
 
+    def __str__(self) -> str:
+        if self == VariableType.INT:
+            return "int"
+        if self == VariableType.INT_ARRAY:
+            return "array"
+        if self == VariableType.VOID_FUNCTION:
+            return "function (void)"
+        if self == VariableType.INT_FUNCTION:
+            return "function (int)"
+        raise Exception("SHASH")
+
 class SymbolTableEntry:
     """
     Each entry in the symbol table has this type
@@ -121,12 +132,14 @@ class SemanticAnalyzer:
     def __init__(self):
         # A stack which each entry contains a list of variables in a scope
         self.has_error = False
-        self.scope_stack: list[list[SymbolTableEntry]] = [[]]
+        self.scope_stack: list[list[SymbolTableEntry]] = [[SymbolTableEntry("output", VariableType.VOID_FUNCTION, [VariableType.INT])]]
         self.error_list: list[str] = []
         # A list which each entry is a list of break statements in each scope.
         # Each entry represents a nested for loop. We break always breaks the inner loop.
         self.break_addresses: list[list[int]] = []
-        self.function_list : dict[str:list] = {}
+        self.function_list : dict[str, list] = {
+            "output": [VariableType.VOID_FUNCTION, [VariableType.INT]]
+        }
 
     def enter_scope(self):
         self.scope_stack.append([])
@@ -172,7 +185,6 @@ class SemanticAnalyzer:
         Declare a new int array in the current scope
         """
         assert not self.get_entry(name)
-        print("CAMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-----------------------------------")
         self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT_ARRAY, size))
 
     def declare_function(self, name: str, return_type: Constants, start_address: int):
@@ -925,6 +937,7 @@ class CodeGenerator:
             # we do not push anything and thus the Expression-stmt will remove it.
             # But we need to pop the Constants.OUTPUT_FUNCTION from the stack. So we pop one from ss
             self.ss.pop()
+            self.call_stack.pop()
             return
         # self.program_block.add_instruction(ThreeAddressInstruction(
         #         # PRINT(R2)
@@ -992,6 +1005,7 @@ class CodeGenerator:
         print(self.pid_scope_stack)
         # print("sag2",self.pid_scope_stack.pop())
         self.arg_nums.pop()
+        self.call_stack.pop()
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
         print(self.pid_scope_stack)
@@ -1041,7 +1055,7 @@ class CodeGenerator:
                     print(self.semantic_analyzer.scope_stack[0])
                     print("Global +++++++++++++++++++++++++++++++++++++++++")
                     if variable.var_type != wanted_type :
-                        print(f"Error, expected {wanted_type} got {variable.var_type}")
+                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
         else : 
             for variable in self.semantic_analyzer.scope_stack[1] :
                 if variable.address == arg_addr :
@@ -1049,7 +1063,7 @@ class CodeGenerator:
                     print(self.semantic_analyzer.scope_stack[1])
                     print("Local -----------------------------------------------")
                     if variable.var_type != wanted_type :
-                        print(f"Error, expected {wanted_type} got {variable.var_type}")
+                        self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! Mismatch in type of argument '{self.arg_nums[-1] + 1}' of '{self.call_stack[-1]}'. Expected '{wanted_type}' but got '{variable.var_type}' instead.")
         self.arg_nums[-1] += 1
         print(self.ss)
         print(self.pid_scope_stack)
@@ -1297,6 +1311,7 @@ class CodeGenerator:
         # Is this the output function?
         if self.scanner.lookahead_token[1] == "output":
             self.ss.append(int(Constants.OUTPUT_FUNCTION))
+            self.call_stack.append("output")
             return
         # Get the entry from semantic analyzer
         variable = self.semantic_analyzer.get_entry(self.scanner.lookahead_token[1])
@@ -1720,7 +1735,7 @@ class CodeGenerator:
         """
         # Check if this is a dangling break
         if len(self.semantic_analyzer.break_addresses) == 0:
-            self.semantic_analyzer.error_list.append(f"{self.scanner.line_number}: Semantic Error! No 'while' found for 'break'")
+            self.semantic_analyzer.error_list.append(f"#{self.scanner.line_number}: Semantic Error! No 'while' found for 'break'")
             return
         # Add this pc to list and add a hole
         self.semantic_analyzer.break_addresses[-1].append(self.program_block.get_pc())

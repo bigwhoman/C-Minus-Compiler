@@ -26,7 +26,7 @@ def main():
         for error in c_parser.code_generator.semantic_analyzer.error_list:
             semantic_errors.write(error)
             semantic_errors.write("\n")
-        else:
+        if len(c_parser.code_generator.semantic_analyzer.error_list) == 0:
             semantic_errors.write("The input program is semantically correct.\n")
 
 if __name__ == "__main__":

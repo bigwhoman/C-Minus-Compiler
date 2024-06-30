@@ -1,0 +1,17 @@
+int n(int a) {
+    return -a;
+}
+
+void main(void) {
+    int a;
+    int b;
+    int c;
+
+    a = 1;
+    b = 2;
+    c = 3;
+    output(n(a));
+    output(-1);
+    output(n(0));
+    output(a * -b * +c);
+}
