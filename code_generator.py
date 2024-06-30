@@ -126,6 +126,7 @@ class SemanticAnalyzer:
         # A list which each entry is a list of break statements in each scope.
         # Each entry represents a nested for loop. We break always breaks the inner loop.
         self.break_addresses: list[list[int]] = []
+        self.function_list : dict[str:list] = {}
 
     def enter_scope(self):
         self.scope_stack.append([])
@@ -171,6 +172,7 @@ class SemanticAnalyzer:
         Declare a new int array in the current scope
         """
         assert not self.get_entry(name)
+        print("CAMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-----------------------------------")
         self.scope_stack[-1].append(SymbolTableEntry(name, VariableType.INT_ARRAY, size))
 
     def declare_function(self, name: str, return_type: Constants, start_address: int):
@@ -187,6 +189,7 @@ class SemanticAnalyzer:
             raise Exception("RIDEMAN BOZORG")
         # Create entry
         entry = SymbolTableEntry(name, function_type, [])
+        self.function_list[name] = [function_type]
         entry.address = start_address
         self.scope_stack[-1].append(entry)
 
@@ -198,6 +201,9 @@ class SemanticAnalyzer:
         # Check if everything is correct and we are actually modifying a function
         assert self.scope_stack[-2][-1].var_type in [VariableType.INT_FUNCTION, VariableType.VOID_FUNCTION]
         # Set the params
+        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        self.function_list[self.scope_stack[-2][-1].lexeme].append(arguments)
+        print(self.function_list)
         self.scope_stack[-2][-1].parameters = arguments
 
     def assign_scope_addresses(self):
@@ -247,7 +253,8 @@ class ProgramBlock:
         self.pc = 0
         self.pc_stack = []
         self.return_stack = []
-        self.has_error
+        self.has_error = False
+
     def add_return(self):
         self.return_stack.append(self.pc)
         self.pc += 1
@@ -331,6 +338,7 @@ class CodeGenerator:
 
 
     def __init__(self, scanner: scanner.Scanner):
+        self.call_stack = []
         self.ss: list[int] = []  # Semantic stack
         self.scanner = scanner
         self.semantic_analyzer = SemanticAnalyzer()
@@ -338,6 +346,8 @@ class CodeGenerator:
         self.program_block = ProgramBlock()
         self.func_params = 0
         self.arg_mem = ARG_MEM()
+        self.args_start = False 
+        self.args = []
         # We can have nested function calls so this is an array
         self.arg_nums: list[int] = []
         # We always define stack pointer the first global variable
@@ -896,6 +906,7 @@ class CodeGenerator:
         print(self.ss)
         print(self.pid_scope_stack)
         # Check if this is the output function
+        
         if self.ss[-self.arg_nums[-1] - 1] == int(Constants.OUTPUT_FUNCTION):
             print("self op")
             assert self.arg_nums[-1] == 1
@@ -1006,10 +1017,39 @@ class CodeGenerator:
         In case of arguments, we should keep the number of them in an stack.
         We add a new zero to stack for this purpose
         """
+        self.args_start = True
         self.arg_nums.append(0)
 
     def push_arg(self):
         print("args ---><<><><")
+        print(self.call_stack)
+        func_args = self.semantic_analyzer.\
+                                                function_list[self.call_stack[-1]][1]
+        print(len(func_args))
+        if self.arg_nums[-1] >= len(func_args) :
+            print("Inconsistant Number -------------------------------")
+            return 
+        arg_addr = self.ss[-1]
+        arg_type = self.pid_scope_stack[-1]
+        wanted_type = self.semantic_analyzer.\
+                                                function_list[self.call_stack[-1]][1]\
+                                                    [self.arg_nums[-1]]
+        if arg_type == VariableScope.GLOBAL_VARIABLE :
+            for variable in self.semantic_analyzer.scope_stack[0] :
+                if variable.address == arg_addr :
+                    print(variable.var_type , variable.lexeme)
+                    print(self.semantic_analyzer.scope_stack[0])
+                    print("Global +++++++++++++++++++++++++++++++++++++++++")
+                    if variable.var_type != wanted_type :
+                        print(f"Error, expected {wanted_type} got {variable.var_type}")
+        else : 
+            for variable in self.semantic_analyzer.scope_stack[1] :
+                if variable.address == arg_addr :
+                    print(variable.var_type, variable.lexeme)
+                    print(self.semantic_analyzer.scope_stack[1])
+                    print("Local -----------------------------------------------")
+                    if variable.var_type != wanted_type :
+                        print(f"Error, expected {wanted_type} got {variable.var_type}")
         self.arg_nums[-1] += 1
         print(self.ss)
         print(self.pid_scope_stack)
@@ -1066,6 +1106,7 @@ class CodeGenerator:
         print("END ++++++++++++++++++++++++++++")
         self.semantic_analyzer.exit_scope()
         self.sp.pointer -= 4
+        # self.call_stack.pop()
         for i in range(len(self.program_block.return_stack)) :
             self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.JP,
                                                                             [ThreeAddressInstructionOperand(self.program_block.get_pc(), ThreeAddressInstructionNumberType.IMMEDIATE)]  )
@@ -1270,6 +1311,8 @@ class CodeGenerator:
             self.pid_scope_stack.append(VariableScope.LOCAL_VARIABLE)
         self.ss.append(variable.address)
         print(variable.lexeme, variable.address)
+        if variable.lexeme in self.semantic_analyzer.function_list.keys() : 
+            self.call_stack.append(variable.lexeme)
 
     def save_operator(self):
         """
