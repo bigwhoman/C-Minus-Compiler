@@ -1,5 +1,5 @@
 #!/bin/bash
-for test in testcases-phase3/T*; do
+for test in testcases-phase3/*; do
     rm input.txt expected.txt semantic_errors.txt stdout.txt output.txt
     echo "RUNNING TEST $test"
     cp "$test/input.txt" input.txt

@@ -587,8 +587,8 @@ def Expression_stmt(parent: anytree.Node) :
 
 	if lookahead in ['break'] :
 		Match('break', current_node)
-		Match(';', current_node)
 		code_generator.break_action()
+		Match(';', current_node)
 		return
 
     
