@@ -1450,6 +1450,7 @@ def Var_call_prime(parent: anytree.Node) :
 		return
 
 	if lookahead in ['('] :
+		code_generator.args_begin()
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)
@@ -1486,6 +1487,7 @@ def Var_prime(parent: anytree.Node) :
 		Match('[', current_node)
 		Expression(current_node)
 		Match(']', current_node)
+		code_generator.array()
 		return
 
     
@@ -1514,6 +1516,7 @@ def Factor_prime(parent: anytree.Node) :
 
 
 	if lookahead in ['('] :
+		code_generator.args_begin()
 		Match('(', current_node)
 		Args(current_node)
 		Match(')', current_node)

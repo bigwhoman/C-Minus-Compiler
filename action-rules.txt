@@ -1,4 +1,4 @@
-Program -> Declaration-list #create_program
+Program -> Declaration-list
 Declaration-list -> Declaration Declaration-list  
 Declaration-list -> '' 
 Declaration -> Declaration-initial Declaration-prime
@@ -32,7 +32,7 @@ Selection-stmt -> if ( Expression ) #save_if Statement Else-stmt
 Else-stmt -> endif #jpf
 Else-stmt -> else #jpf_save Statement endif #jp
 Iteration-stmt -> for (Expression #pop_expression; #for_condition_start Expression #for_condition_end; #for_step_begin Expression #pop_expression #for_step_end) #for_body_begin Statement #for_end
-Return-stmt -> return Return-stmt-prime #function_end
+Return-stmt -> return Return-stmt-prime #jump_to_end
 Return-stmt-prime -> ; | Expression #return_func ;
 Expression -> Simple-expression-zegond | #pid ID B
 B -> = Expression #assign | [ Expression ] #array H | Simple-expression-prime
@@ -54,9 +54,9 @@ Signed-factor -> + Factor | - Factor #negate | Factor
 Signed-factor-prime -> Factor-prime
 Signed-factor-zegond -> + Factor | - Factor #negate | Factor-zegond
 Factor -> ( Expression ) | #pid ID Var-call-prime | #immediate NUM
-Var-call-prime -> ( Args ) #call | Var-prime
+Var-call-prime -> #args_begin ( Args ) #call | Var-prime
 Var-prime -> [ Expression ] #array | ''
-Factor-prime -> ( Args ) #call | ''
+Factor-prime -> #args_begin ( Args ) #call | ''
 Factor-zegond -> ( Expression ) | #immediate NUM
 Args -> Arg-list | ''
 Arg-list -> Expression #push_arg Arg-list-prime

@@ -3,6 +3,7 @@ import scanner
 from enum import Enum, IntEnum
 
 class Constants(IntEnum):
+    OUTPUT_FUNCTION = -1
     INT_TYPE = 1
     VOID_TYPE = 2
 
@@ -332,7 +333,8 @@ class CodeGenerator:
         self.program_block = ProgramBlock()
         self.func_params = 0
         self.arg_mem = ARG_MEM()
-        self.arg_num = 0
+        # We can have nested function calls so this is an array
+        self.arg_nums: list[int] = []
         # We always define stack pointer the first global variable
         self.declared_global_variables = 10
         # Name of the variable we are declaring
@@ -355,8 +357,6 @@ class CodeGenerator:
         self.operator_stack: list[MathOperator] = []
         # Setup PC
         self.pc = PC()
-        # True if the call output is being used
-        self.is_outputting = False
         # initiallize Stack pointer and EAX
         self.initiallize()
 
@@ -863,17 +863,18 @@ class CodeGenerator:
     def jump_to_end(self):
         print("ppppppppppppooooooooooopppppppppppppppppp")
         self.program_block.add_return()
+    
     def call(self):
         print("Call aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         print(self.ss)
         print(self.pid_scope_stack)
-        if self.is_outputting:
+        # Check if this is the output function
+        if self.ss[-self.arg_nums[-1] - 1] == int(Constants.OUTPUT_FUNCTION):
             print("self op")
-            self.arg_num = 0
-            self.is_outputting = False
+            assert self.arg_nums[-1] == 1
+            self.arg_nums.pop()
             # Load the address in registers
             self.find_absolute_address(self.ss[-1], self.pid_scope_stack[-1], self.temp_registers.TEMP_R1)
-                  
             self.program_block.add_instruction(ThreeAddressInstruction(
                 # PRINT(R2)
                 ThreeAddressInstructionOpcode.PRINT,
@@ -884,6 +885,8 @@ class CodeGenerator:
             # Expression-stmt will pop the last variable in stack. To fix this, we push a dummy
             # value in the stack always. But this time, because we have the argument in stack,
             # we do not push anything and thus the Expression-stmt will remove it.
+            # But we need to pop the Constants.OUTPUT_FUNCTION from the stack. So we pop one from ss
+            self.ss.pop()
             return
         # self.program_block.add_instruction(ThreeAddressInstruction(
         #         # PRINT(R2)
@@ -894,7 +897,7 @@ class CodeGenerator:
         self.arg_mem.reset()
         fixed_args = []
         
-        for i in range(self.arg_num) :
+        for i in range(self.arg_nums[-1]) :
             print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
             print(self.ss)
             print(self.pid_scope_stack)
@@ -905,7 +908,7 @@ class CodeGenerator:
             # print("sag ", self.pid_scope_stack.pop())
         print(self.ss)
         print(self.pid_scope_stack)
-        for i in range(self.arg_num) : 
+        for i in range(self.arg_nums[-1]) : 
             self.find_absolute_address(fixed_args[len(fixed_args) - 1 - i][0], fixed_args[len(fixed_args) - 1 - i][0], self.temp_registers.TEMP_R1)
             self.program_block.add_instruction(ThreeAddressInstruction(ThreeAddressInstructionOpcode.ASSIGN,
                                                                         [ThreeAddressInstructionOperand(self.temp_registers.TEMP_R1, ThreeAddressInstructionNumberType.INDIRECT_ADDRESS),
@@ -950,7 +953,7 @@ class CodeGenerator:
         print(self.ss)
         print(self.pid_scope_stack)
         # print("sag2",self.pid_scope_stack.pop())
-        self.arg_num = 0
+        self.arg_nums.pop()
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print(self.ss)
         print(self.pid_scope_stack)
@@ -971,9 +974,16 @@ class CodeGenerator:
         print("stackkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         print("Shoomb Call aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
+    def args_begin(self):
+        """
+        In case of arguments, we should keep the number of them in an stack.
+        We add a new zero to stack for this purpose
+        """
+        self.arg_nums.append(0)
+
     def push_arg(self):
         print("args ---><<><><")
-        self.arg_num += 1
+        self.arg_nums[-1] += 1
         print(self.ss)
         print(self.pid_scope_stack)
         print("end args ---><<><><")
@@ -1218,7 +1228,7 @@ class CodeGenerator:
         assert self.scanner.lookahead_token[0] == scanner.TokenType.ID
         # Is this the output function?
         if self.scanner.lookahead_token[1] == "output":
-            self.is_outputting = True
+            self.ss.append(int(Constants.OUTPUT_FUNCTION))
             return
         # Get the entry from semantic analyzer
         variable = self.semantic_analyzer.get_entry(self.scanner.lookahead_token[1])
