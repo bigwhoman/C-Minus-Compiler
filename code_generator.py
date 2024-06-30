@@ -934,7 +934,8 @@ class CodeGenerator:
         #         ]))
         self.arg_mem.reset()
         fixed_args = []
-        
+        if self.arg_nums != len(self.semantic_analyzer.function_list[self.call_stack[-1]][1]) :
+            print(f"Semantic Error! Mismatch in numbers of arguments of '{self.call_stack[-1]}'.")
         for i in range(self.arg_nums[-1]) :
             print("stackkkkkkkkkkkkkkkkkkkkkkkkkkk")
             print(self.ss)
